@@ -5,7 +5,7 @@ This module defines the API routes for the application.
 from flask import Blueprint, jsonify, request
 
 from db import db
-from models.example import Buyer
+from models.buyer import Buyer
 
 routes = Blueprint('routes', __name__)
 
