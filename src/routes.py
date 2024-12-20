@@ -5,7 +5,7 @@ This module defines the API routes for the application.
 from flask import Blueprint, jsonify, request
 
 from db import db
-from models.buyer import Buyer
+from models.user import User
 
 routes = Blueprint('routes', __name__)
 
@@ -18,7 +18,7 @@ def api_endpoint():
     Returns:
         JSON response containing a list of all Buyer records.
     """
-    data = Buyer.query.all()
+    data = User.query.all()
     return jsonify([item.to_dict() for item in data])
 
 
@@ -34,7 +34,7 @@ def add_numbers():
         JSON response containing a success message and the added Buyer record.
     """
     data = request.json
-    new_entry = Buyer(name=data['name'], age=data['age'])
+    new_entry = User(name=data['name'], age=data['age'])
     db.session.add(new_entry)
     db.session.commit()
     return jsonify(
