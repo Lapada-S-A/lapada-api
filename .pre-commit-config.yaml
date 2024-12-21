@@ -1,0 +1,15 @@
+repos:
+  - repo: local
+    hooks:
+      - id: pre-commit lint
+        name: linting project
+        description: This hook runs pylint before a commit.
+        entry: make lint
+        language: system
+        stages: [pre-commit]
+      - id: pre-commit blue and isort
+        name: formating project
+        description: This hook runs format before a commit and push.
+        entry: make format-check
+        language: system
+        stages: [pre-commit]

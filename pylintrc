@@ -1,0 +1,22 @@
+# Link to keys referencies https://github.com/kubeflow/examples/blob/master/.pylintrc
+[SIMILARITIES]
+
+# Minimum lines number of a similarity.
+min-similarity-lines=100
+
+# Ignore comments when computing similarities.
+ignore-comments=yes
+
+# Ignore docstrings when computing similarities.
+ignore-docstrings=yes
+
+# Ignore imports when computing similarities.
+ignore-imports=no
+
+[MESSAGES CONTROL]
+disable=no-member,too-few-public-methods,useless-super-delegation,import-error,no-name-in-module
+
+extension-pkg-whitelist=cv2
+
+# Maximum number of characters on a single line.
+max-line-length=79
