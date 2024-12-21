@@ -1,4 +1,6 @@
-from datetime import datetime
+"""
+Module for representing items in the database.
+"""
 from db import db
 
 
@@ -11,6 +13,7 @@ class Item(db.Model):
         name (str): The name of the item.
         description (str): A brief description of the item.
     """
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
     description = db.Column(db.String(200), nullable=False)
