@@ -1,12 +1,14 @@
-from flask import Blueprint, jsonify, request
+"""
+This module defines the API routes for the application.
+"""
+
+from flask import Blueprint
+
+from controllers.auction_controller import auction_bp
+from controllers.bid_controller import bid_bp
 
 routes = Blueprint('routes', __name__)
 
-@routes.route('/api', methods=['GET'])
-def api_endpoint():
-    return jsonify({"message": "Hello, World!"})
-
-@routes.route('/add', methods=['POST'])
-def add_numbers():
-    data = request.json
-    return jsonify({"result": data})
+# Blueprints
+routes.register_blueprint(auction_bp)
+routes.register_blueprint(bid_bp)
