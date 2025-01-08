@@ -37,7 +37,7 @@ class AuctionService:
             type_id=1,  # FK fixada para 1
             buyer_id=1,
             seller_id=1,  # FK fixada para 1
-            status_id=1,  # FK fixada para 1
+            status=data['status'],
         )
 
         db.session.add(auction)

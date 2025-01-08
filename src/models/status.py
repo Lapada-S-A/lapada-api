@@ -1,17 +1,23 @@
 """
 Module for representing status in the database.
 """
-from db import db
+from enum import Enum
 
 
-class Status(db.Model):
+class Status(Enum):
     """
-    Represents a status entity in the database.
+    Represents the possible statuses.
 
     Attributes:
-        id (int): The primary key for the status.
-        name (str): The status name.
+        PENDING: The status is pending.
+        ACTIVE: The status is active.
+        FINISHED: The status is finished.
+        REJECTED: The status is rejected.
+        CANCELED: The status is canceled.
     """
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
+    PENDING = 'PENDING'
+    ACTIVE = 'ACTIVE'
+    FINISHED = 'FINISHED'
+    REJECTED = 'REJECTED'
+    CANCELED = 'CANCELED'

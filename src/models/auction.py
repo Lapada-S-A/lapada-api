@@ -4,11 +4,12 @@ Module for representing and managing auctions in the database.import datetime
 import datetime
 
 from db import db
+from models.status import Status
 
 
 class Auction(db.Model):
     """
-    Represents a auction entity in the database.
+    Represents an auction entity in the database.
 
     Attributes:
         id (int): The primary key for the auction.
@@ -22,7 +23,7 @@ class Auction(db.Model):
         type_id (int): Foreign key referring to the type.
         buyer_id (int): Foreign key referring to the buyer.
         seller_id (int): Foreign key referring to the seller.
-        status_id (int): Foreign key referring to the status.
+        status (Status): The status of the auction.
     """
 
     id = db.Column(db.Integer, primary_key=True)
@@ -46,9 +47,7 @@ class Auction(db.Model):
     seller_id = db.Column(
         db.Integer, default=1, nullable=False
     )  # FK com valor fixo 1
-    status_id = db.Column(
-        db.Integer, default=1, nullable=False
-    )  # FK com valor fixo 1
+    status = db.Column(db.Enum(Status), default=Status.PENDING, nullable=False)
 
     def to_dict(self):
         """
@@ -69,5 +68,5 @@ class Auction(db.Model):
             'type_id': self.type_id,
             'buyer_id': self.buyer_id,
             'seller_id': self.seller_id,
-            'status_id': self.status_id,
+            'status': self.status.value,
         }

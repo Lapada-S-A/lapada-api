@@ -1,4 +1,4 @@
-# pylint: disable=broad-except
+# pylint: disable=broad-except,line-too-long
 """
 Module providing auction-related API endpoints.
 Handles creating auctions and retrieving them based on various filters.
@@ -6,6 +6,7 @@ Handles creating auctions and retrieving them based on various filters.
 
 from flask import Blueprint, jsonify, request
 
+from models.status import Status
 from services.auction_service import AuctionService
 
 auctionService = AuctionService()
@@ -49,11 +50,20 @@ def create_auction_endpoint():
         'type_id',
         'buyer_id',
         'seller_id',
-        'status_id',
+        'status',
     ]
 
     try:
         validate_auction_data(data, required_fields)
+
+        if data['status'] not in [status.value for status in Status]:
+            valid_statuses = ', '.join([status.value for status in Status])
+            raise ValueError(
+                f'Invalid status value. Must be one of {valid_statuses}.'
+            )
+
+        data['status'] = Status[data['status']]
+
         auction = auctionService.create_auction(data)
         return jsonify(auction.to_dict()), 201
     except ValueError as val_err:
