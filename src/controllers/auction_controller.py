@@ -42,13 +42,11 @@ def create_auction_endpoint():
     data = request.get_json()
     required_fields = [
         'title',
-        'start_date',
         'end_date',
         'initial_value',
         'min_increment',
         'item_id',
         'type_id',
-        'buyer_id',
         'seller_id',
         'status',
     ]

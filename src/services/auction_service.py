@@ -24,18 +24,15 @@ class AuctionService:
         Returns:
             Auction: The created auction object.
         """
-        start_date = datetime.fromisoformat(data['start_date'])
         end_date = datetime.fromisoformat(data['end_date'])
 
         auction = Auction(
             title=data['title'],
-            start_date=start_date,
             end_date=end_date,
             initial_value=data['initial_value'],
             min_increment=data['min_increment'],
             item_id=1,  # FK fixada para 1
             type_id=1,  # FK fixada para 1
-            buyer_id=1,
             seller_id=1,  # FK fixada para 1
             status=data['status'],
         )
