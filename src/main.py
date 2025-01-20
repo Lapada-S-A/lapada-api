@@ -1,10 +1,20 @@
-import os
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from routes import routes
-from db.config import Config
-from db import db
+"""
+This module initializes and runs a Flask application.
 
+It imports and configures:
+- The Flask application (`app`) with settings from `Config`.
+- The database (`db`) and initializes it with the application.
+- The routes blueprint (`routes`) for handling application routes.
+
+The application creates all database tables when the app context is active.
+Finally, it starts the Flask development server if the script is run directly.
+"""
+
+from flask import Flask
+
+from db import db
+from db.config import Config
+from routes import routes
 
 app = Flask(__name__)
 app.config.from_object(Config)
