@@ -130,3 +130,19 @@ class AuctionService:
         )
         return auctions
     
+    
+    @staticmethod
+    def approve_auction(auction):
+        """
+        Approve an auction by setting its status to 'approved'.
+
+        Args:
+            auction_id (int): The ID of the auction to approve.
+
+        Returns:
+            Auction: The approved Auction object.
+        """
+
+        auction.status = 'ACTIVE'
+        db.session.commit()
+        return auction

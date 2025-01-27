@@ -168,3 +168,24 @@ def get_auctions_by_user_bids(user_id):
         return jsonify([auction.to_dict() for auction in auctions.items]), 200
     except Exception as gen_err:
         return jsonify({'error': str(gen_err)}), 500
+
+@auction_bp.route('/approve/<int:auction_id>', methods=['POST'])
+def approve_auction(auction_id):
+    """
+    Endpoint to change change auction status to active.
+
+    Returns:
+        JSON response with the created auction or error message.
+    """
+
+    try:
+        auction = auctionService.get_auction_by_id(auction_id)
+        print(auction.status)
+        if auction.status != Status.PENDING:
+            raise ValueError('Auction is not pending')
+        auction = auctionService.approve_auction(auction)
+        return jsonify(auction.to_dict()), 201
+    except ValueError as val_err:
+        return jsonify({'error': str(val_err)}), 400
+    except Exception as gen_err:
+        return jsonify({'error': str(gen_err)}), 500
