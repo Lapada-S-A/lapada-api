@@ -6,3 +6,4 @@ pre-commit
 blue
 isort
 pylint
+python-dotenv==1.0.1
