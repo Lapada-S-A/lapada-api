@@ -6,3 +6,4 @@ pre-commit
 blue
 isort
 pylint
+pytest
