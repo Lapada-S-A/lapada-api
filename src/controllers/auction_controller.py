@@ -131,3 +131,24 @@ def fetch_auctions_by_status(status_id):
         return jsonify([auction.to_dict() for auction in auctions.items]), 200
     except Exception as gen_err:
         return jsonify({'error': str(gen_err)}), 500
+    
+@auction_bp.route('/user/<int:user_id>', methods=['GET'])
+def get_auctions_by_user_bids(user_id):
+    """
+    Endpoint to fetch auctions by user with pagination.
+
+    Query Parameters:
+        page (int): The page number for pagination (default is 1).
+        per_page (int): The number of items per page (default is 10).
+
+    Returns:
+        JSON response with paginated auctions by user.
+    """
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+
+    try:
+        auctions = auctionService.get_auctions_by_user_bids(user_id, page, per_page)
+        return jsonify([auction.to_dict() for auction in auctions.items]), 200
+    except Exception as gen_err:
+        return jsonify({'error': str(gen_err)}), 500
