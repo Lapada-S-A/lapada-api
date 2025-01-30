@@ -132,7 +132,7 @@ class AuctionService:
     
     
     @staticmethod
-    def approve_auction(auction):
+    def update_auction_status(auction, new_status):
         """
         Approve an auction by setting its status to 'approved'.
 
@@ -142,7 +142,7 @@ class AuctionService:
         Returns:
             Auction: The approved Auction object.
         """
-
-        auction.status = 'ACTIVE'
+    
+        auction.status = new_status
         db.session.commit()
         return auction
