@@ -59,7 +59,7 @@ class AuctionService:
 
         if filters:
             if 'title' in filters:
-                query = query.filter(Auction.title.ilike(f"%{filters['title']}%"))
+                query = query.filter(Auction.title == filters['title'])
             if 'category_id' in filters:
                 query = query.filter(Auction.category_id == filters['category_id'])
             if 'type_id' in filters:
