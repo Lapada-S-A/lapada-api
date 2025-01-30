@@ -175,13 +175,11 @@ def approve_auction(auction_id):
     Endpoint to change change auction status to active.
 
     Returns:
-        JSON response with the created auction or error message.
+        JSON response with the updated auction or error message.
     """
     try:
         auction = auctionService.get_auction_by_id(auction_id)
-        if auction.status != Status.PENDING:
-            raise ValueError('Auction is not pending')
-        auction = auctionService.approve_auction(auction, Status.ACTIVE)
+        auction = auctionService.update_auction_status(auction, Status.ACTIVE, Status.PENDING)
         return jsonify(auction.to_dict()), 201
     except ValueError as val_err:
         return jsonify({'error': str(val_err)}), 400
@@ -191,16 +189,14 @@ def approve_auction(auction_id):
 @auction_bp.route('/cancel/<int:auction_id>', methods=['POST'])
 def cancel_auction(auction_id):
     """
-    Endpoint to change change auction status to active.
+    Endpoint to change change auction status to canceled.
 
     Returns:
-        JSON response with the created auction or error message.
+        JSON response with the updated auction or error message.
     """
     try:
         auction = auctionService.get_auction_by_id(auction_id)
-        if auction.status != Status.ACTIVE:
-            raise ValueError('Auction is not active')
-        auction = auctionService.approve_auction(auction, Status.CANCELED)
+        auction = auctionService.update_auction_status(auction, Status.CANCELED, Status.ACTIVE)
         return jsonify(auction.to_dict()), 201
     except ValueError as val_err:
         return jsonify({'error': str(val_err)}), 400
@@ -210,16 +206,14 @@ def cancel_auction(auction_id):
 @auction_bp.route('/reject/<int:auction_id>', methods=['POST'])
 def reject_auction(auction_id):
     """
-    Endpoint to change change auction status to active.
+    Endpoint to change change auction status to rejected.
 
     Returns:
-        JSON response with the created auction or error message.
+        JSON response with the updated auction or error message.
     """
     try:
         auction = auctionService.get_auction_by_id(auction_id)
-        if auction.status != Status.PENDING:
-            raise ValueError('Auction is not pending')
-        auction = auctionService.approve_auction(auction, Status.REJECTED)
+        auction = auctionService.update_auction_status(auction, Status.REJECTED, Status.PENDING)
         return jsonify(auction.to_dict()), 201
     except ValueError as val_err:
         return jsonify({'error': str(val_err)}), 400
@@ -236,9 +230,7 @@ def finish_auction(auction_id):
     """
     try:
         auction = auctionService.get_auction_by_id(auction_id)
-        if auction.status != Status.ACTIVE and auction.end_date < datetime.now():
-            raise ValueError('Auction is not pending')
-        auction = auctionService.approve_auction(auction, Status.FINISHED)
+        auction = auctionService.update_auction_status(auction, Status.FINISHED, Status.ACTIVE)
         return jsonify(auction.to_dict()), 201
     except ValueError as val_err:
         return jsonify({'error': str(val_err)}), 400
