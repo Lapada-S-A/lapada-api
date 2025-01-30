@@ -47,20 +47,13 @@ def create_auction_endpoint():
         'min_increment',
         'item_id',
         'type_id',
-        'seller_id',
-        'status',
+        'seller_id'
     ]
 
     try:
         validate_auction_data(data, required_fields)
 
-        if data['status'] not in [status.value for status in Status]:
-            valid_statuses = ', '.join([status.value for status in Status])
-            raise ValueError(
-                f'Invalid status value. Must be one of {valid_statuses}.'
-            )
-
-        data['status'] = Status[data['status']]
+        data['status'] = Status['PENDING']
 
         auction = auctionService.create_auction(data)
         return jsonify(auction.to_dict()), 201
