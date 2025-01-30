@@ -7,3 +7,5 @@ blue
 isort
 pylint
 pytest
+python-dotenv
+gunicorn

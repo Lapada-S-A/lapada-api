@@ -9,6 +9,7 @@ It imports and configures:
 The application creates all database tables when the app context is active.
 Finally, it starts the Flask development server if the script is run directly.
 """
+import os
 
 from flask import Flask
 
@@ -26,4 +27,5 @@ with app.app_context():
     db.create_all()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.getenv("PORT"))
+    app.run(host="0.0.0.0", port=port)
