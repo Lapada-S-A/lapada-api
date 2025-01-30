@@ -8,3 +8,4 @@ isort
 pylint
 pytest
 python-dotenv
+flask-cors
