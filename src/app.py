@@ -11,6 +11,8 @@ Finally, it starts the Flask development server if the script is run directly.
 """
 
 from flask import Flask
+from flask_cors import CORS
+
 
 from db import db
 from db.config import Config
@@ -19,6 +21,8 @@ from routes import routes
 app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
+
+CORS(app)
 
 app.register_blueprint(routes)
 
