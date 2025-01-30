@@ -44,20 +44,37 @@ class AuctionService:
         return auction
 
     @staticmethod
-    def get_all_auctions(page, per_page):
+    def get_all_auctions(page=1, per_page=10, filters=None):
         """
-        Fetches all auctions with pagination.
+        Fetch paginated auctions with optional filters.
 
         Args:
-            page (int): The page number.
-            per_page (int): The number of items per page.
+            page (int): Page number for pagination.
+            per_page (int): Number of items per page.
+            filters (dict): Optional filters for query.
 
         Returns:
-            Pagination: The paginated result of auctions.
+            Pagination object with filtered auctions.
         """
-        return Auction.query.paginate(
-            page=page, per_page=per_page, error_out=False
-        )
+        query = Auction.query
+
+        if filters:
+            if 'title' in filters:
+                query = query.filter(Auction.title == filters['title'])
+            if 'category_id' in filters:
+                query = query.filter(Auction.category_id == filters['category_id'])
+            if 'type_id' in filters:
+                query = query.filter(Auction.type_id == filters['type_id'])
+            if 'status' in filters:
+                query = query.filter(Auction.status == filters['status'])
+            if 'min_bid' in filters:
+                query = query.filter(Auction.current_bid >= filters['min_bid'])
+            if 'max_bid' in filters:
+                query = query.filter(Auction.current_bid <= filters['max_bid'])
+            if 'end_date' in filters:
+                query = query.filter(Auction.end_date == filters['end_date'])
+
+        return query.paginate(page=page, per_page=per_page, error_out=False)
 
     @staticmethod
     def get_auction_by_id(auction_id):

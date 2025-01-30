@@ -4,6 +4,7 @@ Module providing auction-related API endpoints.
 Handles creating auctions and retrieving them based on various filters.
 """
 
+from datetime import datetime
 from flask import Blueprint, jsonify, request
 
 from models.status import Status
@@ -73,20 +74,42 @@ def create_auction_endpoint():
 @auction_bp.route('/list', methods=['GET'])
 def list_auctions():
     """
-    Endpoint to list all auctions with pagination.
+    Endpoint to list auctions with pagination and optional filters.
 
     Query Parameters:
         page (int): The page number for pagination (default is 1).
         per_page (int): The number of items per page (default is 10).
+        title (str, optional): Filter by auction title.
+        category_id (int, optional): Filter by category.
+        type_id (int, optional): Filter by auction type.
+        status (str, optional): Filter by auction status.
+        min_bid (float, optional): Filter auctions with a minimum bid.
+        max_bid (float, optional): Filter auctions with a maximum bid.
+        end_date (str, optional): Filter auctions ending on a specific date.
 
     Returns:
-        JSON response with the paginated list of auctions.
+        JSON response with paginated list of auctions.
     """
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
 
+    filters = {
+        'title': request.args.get('title', type=str),
+        'category_id': request.args.get('category_id', type=int),
+        'type_id': request.args.get('type_id', type=int),
+        'status': request.args.get('status', type=str),
+        'min_bid': request.args.get('min_bid', type=float),
+        'max_bid': request.args.get('max_bid', type=float),
+        'end_date': request.args.get('end_date', type=str),
+    }
+
+    filters = {k: v for k, v in filters.items() if v is not None}
+
+    if 'end_date' in filters:
+        filters['end_date'] = datetime.fromisoformat(filters['end_date'])
+
     try:
-        auctions = auctionService.get_all_auctions(page, per_page)
+        auctions = auctionService.get_all_auctions(page, per_page, filters)
         return jsonify([auction.to_dict() for auction in auctions.items]), 200
     except Exception as gen_err:
         return jsonify({'error': str(gen_err)}), 500
