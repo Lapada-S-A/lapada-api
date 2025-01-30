@@ -6,6 +6,7 @@ from datetime import datetime
 
 from db import db
 from models.auction import Auction
+from models.bid import Bid
 
 
 class AuctionService:
@@ -87,3 +88,27 @@ class AuctionService:
         return Auction.query.filter_by(status_id=status_id).paginate(
             page=page, per_page=per_page, error_out=False
         )
+
+    @staticmethod
+    def get_auctions_by_user_bids(user_id, page, per_page):
+        """
+            Fetches auctions in which a user has placed bids.
+
+            Args:
+                user_id (int): The ID of the user.
+                page (int): Page number.
+                per_page (int): Number of items per page.
+
+            Returns:
+                Pagination: Paginated list of auctions.
+        """
+
+        auctions = (
+            db.session.query(Auction)
+            .join(Bid)
+            .filter(Bid.buyer_id == user_id)
+            .distinct()
+            .paginate(page=page, per_page=per_page, error_out=False)
+        )
+        return auctions
+    
