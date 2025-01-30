@@ -28,7 +28,7 @@ class Auction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), nullable=False)
     created_date = db.Column(
-        db.DateTime, default=datetime.datetime.utcnow, nullable=False
+        db.DateTime, default=datetime.datetime.utcnow().date, nullable=False
     )
     end_date = db.Column(db.DateTime, nullable=False)
     initial_value = db.Column(db.Float, nullable=False)
@@ -54,11 +54,12 @@ class Auction(db.Model):
         return {
             'id': self.id,
             'title': self.title,
-            'end_date': self.end_date.isoformat(),
+            'end_date': self.end_date.strftime('%d-%m-%Y-%H-%M-%S'),
             'initial_value': self.initial_value,
             'min_increment': self.min_increment,
             'item_id': self.item_id,
             'type_id': self.type_id,
             'seller_id': self.seller_id,
             'status': self.status.value,
+            'created_date': self.created_date.strftime('%d-%m-%Y-%H-%M-%S')
         }
