@@ -81,7 +81,7 @@ def list_auctions():
         end_date (str, optional): Filter auctions ending on a specific date.
 
     Returns:
-        JSON response with paginated list of auctions.
+        JSON response with paginated list of auctions and pagination data.
     """
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
@@ -103,7 +103,19 @@ def list_auctions():
 
     try:
         auctions = auctionService.get_all_auctions(page, per_page, filters)
-        return jsonify([auction.to_dict() for auction in auctions.items]), 200
+        
+        # Prepare the response with pagination data
+        response = {
+            'items': [auction.to_dict() for auction in auctions.items],
+            'pagination': {
+                'page': page,
+                'per_page': per_page,
+                'total': auctions.total,  # Assuming `total` is provided by the service
+            }
+        }
+
+        return jsonify(response), 200
+
     except Exception as gen_err:
         return jsonify({'error': str(gen_err)}), 500
 
@@ -144,10 +156,22 @@ def fetch_auctions_by_status(status_id):
         auctions = auctionService.get_auctions_by_status(
             status_id, page, per_page
         )
-        return jsonify([auction.to_dict() for auction in auctions.items]), 200
+
+        response = {
+            'items': [auction.to_dict() for auction in auctions.items],
+            'pagination': {
+                'page': page,
+                'per_page': per_page,
+                'total': auctions.total,  # Assuming `total` is provided by the service
+            }
+        }
+
+        return jsonify(response), 200
+
     except Exception as gen_err:
         return jsonify({'error': str(gen_err)}), 500
-    
+
+
 @auction_bp.route('/user/<int:user_id>', methods=['GET'])
 def get_auctions_by_user_bids(user_id):
     """
@@ -165,6 +189,17 @@ def get_auctions_by_user_bids(user_id):
 
     try:
         auctions = auctionService.get_auctions_by_user_bids(user_id, page, per_page)
-        return jsonify([auction.to_dict() for auction in auctions.items]), 200
+
+        response = {
+            'items': [auction.to_dict() for auction in auctions.items],
+            'pagination': {
+                'page': page,
+                'per_page': per_page,
+                'total': auctions.total,  # Assuming `total` is provided by the service
+            }
+        }
+
+        return jsonify(response), 200
+
     except Exception as gen_err:
         return jsonify({'error': str(gen_err)}), 500
