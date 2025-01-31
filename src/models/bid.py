@@ -22,7 +22,7 @@ class Bid(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(db.Float, nullable=False)
     bid_date = db.Column(
-        db.DateTime, default=datetime.datetime.utcnow, nullable=False
+        db.DateTime, default=datetime.datetime.utcnow().date, nullable=False
     )
     auction_id = db.Column(
         db.Integer, db.ForeignKey('auction.id'), nullable=False
@@ -44,7 +44,7 @@ class Bid(db.Model):
         return {
             'id': self.id,
             'amount': self.amount,
-            'bid_date': self.bid_date.isoformat(),
+            'bid_date': self.bid_date.strftime('%d-%m-%Y-%H-%M-%S'),
             'auction_id': self.auction_id,
             'buyer_id': self.buyer_id,
             'bid_status_id': self.bid_status_id,
