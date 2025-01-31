@@ -44,7 +44,7 @@ class Auction(db.Model):
     )  # FK com valor fixo 1
     status = db.Column(db.Enum(Status), default=Status.PENDING, nullable=False)
 
-    def to_dict(self):
+    def to_dict(self, highest_bid=None):
         """
         Convert the Auction object into a dictionary.
 
@@ -61,5 +61,6 @@ class Auction(db.Model):
             'type_id': self.type_id,
             'seller_id': self.seller_id,
             'status': self.status.value,
-            'created_date': self.created_date.strftime('%d-%m-%Y-%H-%M-%S')
+            'created_date': self.created_date.strftime('%d-%m-%Y-%H-%M-%S'),
+            'highest_bid': highest_bid
         }
