@@ -152,3 +152,17 @@ class AuctionService:
         auction.status = new_status
         db.session.commit()
         return auction
+
+    @staticmethod
+    def get_highest_bid(auction_id):
+        """
+        Fetch the highest bid for a given auction.
+
+        Args:
+            auction_id (int): The ID of the auction to fetch the highest bid for.
+
+        Returns:
+            float: The highest bid amount.
+        """
+        highest_bid = db.session.query(Bid.amount).filter(Bid.auction_id == auction_id).order_by(Bid.amount.desc()).first()
+        return highest_bid[0] if highest_bid else None

@@ -106,7 +106,7 @@ def list_auctions():
         
         # Prepare the response with pagination data
         response = {
-            'items': [auction.to_dict() for auction in auctions.items],
+            'items': [auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) for auction in auctions.items],
             'pagination': {
                 'page': page,
                 'per_page': per_page,
@@ -131,7 +131,7 @@ def get_auction(auction_id):
     try:
         auction = auctionService.get_auction_by_id(auction_id)
         if auction:
-            return jsonify(auction.to_dict()), 200
+            return jsonify(auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id))), 200
         return jsonify({'error': 'Auction not found'}), 404
     except Exception as gen_err:
         return jsonify({'error': str(gen_err)}), 500
@@ -158,7 +158,7 @@ def fetch_auctions_by_status(status_id):
         )
 
         response = {
-            'items': [auction.to_dict() for auction in auctions.items],
+            'items': [auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) for auction in auctions.items],
             'pagination': {
                 'page': page,
                 'per_page': per_page,
@@ -191,7 +191,7 @@ def get_auctions_by_user_bids(user_id):
         auctions = auctionService.get_auctions_by_user_bids(user_id, page, per_page)
 
         response = {
-            'items': [auction.to_dict() for auction in auctions.items],
+            'items': [auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) for auction in auctions.items],
             'pagination': {
                 'page': page,
                 'per_page': per_page,
