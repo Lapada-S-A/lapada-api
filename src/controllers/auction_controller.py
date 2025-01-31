@@ -97,9 +97,6 @@ def list_auctions():
 
     filters = {k: v for k, v in filters.items() if v is not None}
 
-    if 'end_date' in filters:
-        filters['end_date'] = datetime.fromisoformat(filters['end_date'])
-
     try:
         auctions = auctionService.get_all_auctions(page, per_page, filters)
         
