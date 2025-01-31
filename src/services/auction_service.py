@@ -105,15 +105,24 @@ class AuctionService:
     @staticmethod
     def get_auction_by_id(auction_id):
         """
-        Fetches an auction by its ID from the database.
+        Fetches an auction by its ID from the database, including item details.
 
         Args:
             auction_id (int): The ID of the auction to fetch.
 
         Returns:
-            Auction: The Auction object if found, else None.
+            dict: A dictionary containing auction and item details.
         """
-        return Auction.query.get(auction_id)
+        auction = Auction.query.get(auction_id)
+        if auction:
+            item_details = {
+                'item_name': auction.item.name,
+                'item_description': auction.item.description
+            }
+            auction_data = auction.to_dict()
+            auction_data['item_details'] = item_details
+            return auction_data
+        return None
 
     @staticmethod
     def get_auctions_by_status(status_id, page, per_page):

@@ -107,14 +107,13 @@ def list_auctions():
     except Exception as gen_err:
         return jsonify({'error': str(gen_err)}), 500
 
-
 @auction_bp.route('/list/<int:auction_id>', methods=['GET'])
 def get_auction(auction_id):
     """
-    Endpoint to fetch details of a specific auction by ID.
+    Endpoint to fetch details of a specific auction by ID, including item details.
 
     Returns:
-        JSON response with the auction details or error message if not found.
+        JSON response with the auction and item details or error message if not found.
     """
     try:
         auction = auctionService.get_auction_by_id(auction_id)

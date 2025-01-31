@@ -14,6 +14,7 @@ class Auction(db.Model):
     Attributes:
         id (int): The primary key for the auction.
         title (str): The title of the auction.
+        description (str): The description of the auction.
         start_date (datetime): The starting date of the auction.
         end_date (datetime): The ending date of the auction.
         initial_value (float): The initial value of the auction.
@@ -42,6 +43,7 @@ class Auction(db.Model):
         db.Integer, default=1, nullable=False
     )  # FK com valor fixo 1
     status = db.Column(db.Enum(Status), default=Status.PENDING, nullable=False)
+    item = db.relationship('Item', backref='auctions')
 
     categories = db.relationship('Category', secondary=auction_category, back_populates='auctions')
 
