@@ -1,3 +1,6 @@
 /env
 .env
+.coverage
+coverage/
+htmlcov/
 **/__pycache__/
