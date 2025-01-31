@@ -5,6 +5,8 @@ including creating and fetching auctions.
 from datetime import datetime
 from random import randint
 
+from sqlalchemy import func
+
 from db import db
 from models.auction import Auction
 from models.bid import Bid
@@ -64,18 +66,38 @@ class AuctionService:
         if filters:
             if 'title' in filters:
                 query = query.filter(Auction.title == filters['title'])
-            if 'category_id' in filters:
-                query = query.filter(Auction.category_id == filters['category_id'])
             if 'type_id' in filters:
                 query = query.filter(Auction.type_id == filters['type_id'])
             if 'status' in filters:
                 query = query.filter(Auction.status == filters['status'])
-            if 'min_bid' in filters:
-                query = query.filter(Auction.current_bid >= filters['min_bid'])
-            if 'max_bid' in filters:
-                query = query.filter(Auction.current_bid <= filters['max_bid'])
             if 'end_date' in filters:
-                query = query.filter(Auction.end_date == filters['end_date'])
+                try:
+                    # Convertendo o formato 'DD-MM-YYYY' para 'YYYY-MM-DD'
+                    end_date = datetime.strptime(filters['end_date'], "%Y-%m-%d").date()
+                    query = query.filter(func.date(Auction.end_date) <= end_date)
+                except ValueError:
+                    raise ValueError("Formato de data inválido. Use 'DD-MM-YYYY'.")
+
+
+            if 'min_bid' in filters or 'max_bid' in filters:
+                # Subquery para calcular o maior lance (highest bid) de cada leilão
+                highest_bids = (
+                    db.session.query(
+                        Bid.auction_id, 
+                        func.max(Bid.amount).label("highest_bid")
+                    )
+                    .group_by(Bid.auction_id)
+                    .subquery()
+                )
+
+                # Fazendo o join entre Auction e a subquery
+                query = query.join(highest_bids, Auction.id == highest_bids.c.auction_id)
+
+                # Aplicando os filtros com base no maior lance
+                if 'min_bid' in filters:
+                    query = query.filter(highest_bids.c.highest_bid >= filters['min_bid'])
+                if 'max_bid' in filters:
+                    query = query.filter(highest_bids.c.highest_bid <= filters['max_bid'])
 
         return query.paginate(page=page, per_page=per_page, error_out=False)
 
