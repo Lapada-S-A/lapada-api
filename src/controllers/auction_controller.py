@@ -203,3 +203,71 @@ def get_auctions_by_user_bids(user_id):
 
     except Exception as gen_err:
         return jsonify({'error': str(gen_err)}), 500
+
+@auction_bp.route('/approve/<int:auction_id>', methods=['POST'])
+def approve_auction(auction_id):
+    """
+    Endpoint to change change auction status to active.
+
+    Returns:
+        JSON response with the updated auction or error message.
+    """
+    try:
+        auction = auctionService.get_auction_by_id(auction_id)
+        auction = auctionService.update_auction_status(auction, Status.ACTIVE, Status.PENDING)
+        return jsonify(auction.to_dict()), 201
+    except ValueError as val_err:
+        return jsonify({'error': str(val_err)}), 400
+    except Exception as gen_err:
+        return jsonify({'error': str(gen_err)}), 500
+
+@auction_bp.route('/cancel/<int:auction_id>', methods=['POST'])
+def cancel_auction(auction_id):
+    """
+    Endpoint to change change auction status to canceled.
+
+    Returns:
+        JSON response with the updated auction or error message.
+    """
+    try:
+        auction = auctionService.get_auction_by_id(auction_id)
+        auction = auctionService.update_auction_status(auction, Status.CANCELED, Status.ACTIVE)
+        return jsonify(auction.to_dict()), 201
+    except ValueError as val_err:
+        return jsonify({'error': str(val_err)}), 400
+    except Exception as gen_err:
+        return jsonify({'error': str(gen_err)}), 500
+
+@auction_bp.route('/reject/<int:auction_id>', methods=['POST'])
+def reject_auction(auction_id):
+    """
+    Endpoint to change change auction status to rejected.
+
+    Returns:
+        JSON response with the updated auction or error message.
+    """
+    try:
+        auction = auctionService.get_auction_by_id(auction_id)
+        auction = auctionService.update_auction_status(auction, Status.REJECTED, Status.PENDING)
+        return jsonify(auction.to_dict()), 201
+    except ValueError as val_err:
+        return jsonify({'error': str(val_err)}), 400
+    except Exception as gen_err:
+        return jsonify({'error': str(gen_err)}), 500
+    
+@auction_bp.route('/finish/<int:auction_id>', methods=['POST'])
+def finish_auction(auction_id):
+    """
+    Endpoint to change change auction status to active.
+
+    Returns:
+        JSON response with the created auction or error message.
+    """
+    try:
+        auction = auctionService.get_auction_by_id(auction_id)
+        auction = auctionService.update_auction_status(auction, Status.FINISHED, Status.ACTIVE)
+        return jsonify(auction.to_dict()), 201
+    except ValueError as val_err:
+        return jsonify({'error': str(val_err)}), 400
+    except Exception as gen_err:
+        return jsonify({'error': str(gen_err)}), 500

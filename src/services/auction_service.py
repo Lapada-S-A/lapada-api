@@ -7,6 +7,7 @@ from datetime import datetime
 from db import db
 from models.auction import Auction
 from models.bid import Bid
+from models.status import Status
 
 
 class AuctionService:
@@ -130,3 +131,24 @@ class AuctionService:
         )
         return auctions
     
+    
+    @staticmethod
+    def update_auction_status(auction, new_status, expected_status=None):
+        """
+        Update the status of an auction.
+
+        Args:
+            auction (Auction): The auction object to update.
+            new_status (Status): The new status to set.
+            expected_status (Status): The expected status of the auction.
+
+        Returns:
+            Auction: The updated auction object.
+        """
+        if expected_status and auction.status != expected_status:
+            raise ValueError(f'Auction must be {expected_status.name.lower()} to change status.')
+        if expected_status  == Status.FINISHED and auction.end_date < datetime.now():
+            raise ValueError('End date has not been reached yet.')
+        auction.status = new_status
+        db.session.commit()
+        return auction
