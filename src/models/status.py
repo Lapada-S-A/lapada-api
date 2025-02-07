@@ -16,8 +16,8 @@ class Status(Enum):
         CANCELED: The status is canceled.
     """
 
-    PENDING = 'PENDING'
-    ACTIVE = 'ACTIVE'
-    FINISHED = 'FINISHED'
-    REJECTED = 'REJECTED'
-    CANCELED = 'CANCELED'
+    PENDING = '1'
+    ACTIVE = '2'
+    FINISHED = '3'
+    REJECTED = '4'
+    CANCELED = '5'

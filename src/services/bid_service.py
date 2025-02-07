@@ -25,8 +25,7 @@ class BidService:
         bid = Bid(
             amount=data['amount'],
             auction_id=data['auction_id'],
-            buyer_id=data['buyer_id'],
-            bid_status_id=data['bid_status_id'],
+            buyer_id=data['buyer_id']
         )
 
         db.session.add(bid)

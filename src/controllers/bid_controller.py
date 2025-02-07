@@ -30,7 +30,7 @@ def create_bid_endpoint():
     """
     data = request.get_json()
 
-    required_fields = ['amount', 'auction_id', 'buyer_id', 'bid_status_id']
+    required_fields = ['amount', 'auction_id', 'buyer_id']
     if not data or not all(field in data for field in required_fields):
         return (
             jsonify({'error': 'Invalid input, missing required fields'}),
