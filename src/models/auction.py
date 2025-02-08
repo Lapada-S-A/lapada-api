@@ -37,8 +37,8 @@ class Auction(db.Model):
         db.Integer, default=1, nullable=False
     )  # FK com valor fixo 1
     type_id = db.Column(
-        db.Integer, default=1, nullable=False
-    )  # FK com valor fixo 1
+        db.Integer, db.ForeignKey('type.id'), default=1, nullable=False
+    )
     seller_id = db.Column(
         db.Integer, default=1, nullable=False
     )  # FK com valor fixo 1

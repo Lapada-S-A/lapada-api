@@ -47,7 +47,8 @@ def create_auction_endpoint():
         'initial_value',
         'min_increment',
         'item_id',
-        'seller_id'
+        'seller_id',
+        'type_id'
     ]
 
     try:
@@ -66,24 +67,10 @@ def create_auction_endpoint():
 @auction_bp.route('/list', methods=['GET'])
 def list_auctions():
     """
-    Endpoint to list auctions with pagination and optional filters.
-
-    Query Parameters:
-        page (int): The page number for pagination (default is 1).
-        per_page (int): The number of items per page (default is 10).
-        title (str, optional): Filter by auction title.
-        category_id (int, optional): Filter by category.
-        type_id (int, optional): Filter by auction type.
-        status (str, optional): Filter by auction status.
-        min_bid (float, optional): Filter auctions with a minimum bid.
-        max_bid (float, optional): Filter auctions with a maximum bid.
-        end_date (str, optional): Filter auctions ending on a specific date.
-
-    Returns:
-        JSON response with paginated list of auctions and pagination data.
+    Endpoint to list auctions with optional pagination and filters.
     """
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 10, type=int)
+    page = request.args.get('page', type=int)
+    per_page = request.args.get('per_page', type=int)
 
     filters = {
         'title': request.args.get('title', type=str),
@@ -99,17 +86,20 @@ def list_auctions():
 
     try:
         auctions = auctionService.get_all_auctions(page, per_page, filters)
+
+        # Se for uma lista normal, formata direto
+        if isinstance(auctions, list):
+            return jsonify([auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) for auction in auctions]), 200
         
-        # Prepare the response with pagination data
+        # Caso contrário, assume que é um objeto paginado
         response = {
             'items': [auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) for auction in auctions.items],
             'pagination': {
-                'page': page,
-                'per_page': per_page,
-                'total': auctions.total,  # Assuming `total` is provided by the service
+                'page': auctions.page,
+                'per_page': auctions.per_page,
+                'total': auctions.total,
             }
         }
-
         return jsonify(response), 200
 
     except Exception as gen_err:

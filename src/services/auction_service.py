@@ -37,9 +37,9 @@ class AuctionService:
             initial_value=data['initial_value'],
             min_increment=data['min_increment'],
             item_id=1,  # FK fixada para 1
-            type_id=randint(1, 3),  # FK fixada para 1
             seller_id=1,  # FK fixada para 1
             status=data['status'],
+            type_id=data['type_id'],
             created_date=datetime.now()
         )
 
@@ -49,17 +49,17 @@ class AuctionService:
         return auction
 
     @staticmethod
-    def get_all_auctions(page=1, per_page=10, filters=None):
+    def get_all_auctions(page=None, per_page=None, filters=None):
         """
-        Fetch paginated auctions with optional filters.
+        Fetch auctions with optional pagination and filters.
 
         Args:
-            page (int): Page number for pagination.
-            per_page (int): Number of items per page.
-            filters (dict): Optional filters for query.
+            page (int, optional): Page number for pagination.
+            per_page (int, optional): Number of items per page.
+            filters (dict, optional): Optional filters for query.
 
         Returns:
-            Pagination object with filtered auctions.
+            List or pagination object with filtered auctions.
         """
         query = Auction.query
 
@@ -72,15 +72,12 @@ class AuctionService:
                 query = query.filter(Auction.status == filters['status'])
             if 'end_date' in filters:
                 try:
-                    # Convertendo o formato 'DD-MM-YYYY' para 'YYYY-MM-DD'
                     end_date = datetime.strptime(filters['end_date'], "%Y-%m-%d").date()
                     query = query.filter(func.date(Auction.end_date) <= end_date)
                 except ValueError:
-                    raise ValueError("Formato de data inválido. Use 'DD-MM-YYYY'.")
-
+                    raise ValueError("Formato de data inválido. Use 'YYYY-MM-DD'.")
 
             if 'min_bid' in filters or 'max_bid' in filters:
-                # Subquery para calcular o maior lance (highest bid) de cada leilão
                 highest_bids = (
                     db.session.query(
                         Bid.auction_id, 
@@ -89,17 +86,18 @@ class AuctionService:
                     .group_by(Bid.auction_id)
                     .subquery()
                 )
-
-                # Fazendo o join entre Auction e a subquery
                 query = query.join(highest_bids, Auction.id == highest_bids.c.auction_id)
 
-                # Aplicando os filtros com base no maior lance
                 if 'min_bid' in filters:
                     query = query.filter(highest_bids.c.highest_bid >= filters['min_bid'])
                 if 'max_bid' in filters:
                     query = query.filter(highest_bids.c.highest_bid <= filters['max_bid'])
 
-        return query.paginate(page=page, per_page=per_page, error_out=False)
+        # Se page e per_page forem passados, retorna com paginação, senão retorna lista normal
+        if page is not None and per_page is not None:
+            return query.paginate(page=page, per_page=per_page, error_out=False)
+        return query.all()
+
 
     @staticmethod
     def get_auction_by_id(auction_id):
