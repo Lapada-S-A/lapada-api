@@ -47,7 +47,8 @@ def create_auction_endpoint():
         'initial_value',
         'min_increment',
         'item_id',
-        'seller_id'
+        'seller_id',
+        'type_id'
     ]
 
     try:

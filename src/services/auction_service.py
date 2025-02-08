@@ -37,9 +37,9 @@ class AuctionService:
             initial_value=data['initial_value'],
             min_increment=data['min_increment'],
             item_id=1,  # FK fixada para 1
-            type_id=randint(1, 3),  # FK fixada para 1
             seller_id=1,  # FK fixada para 1
             status=data['status'],
+            type_id=data['type_id'],
             created_date=datetime.now()
         )
 
