@@ -36,7 +36,7 @@ class AuctionService:
             end_date=end_date,
             initial_value=data['initial_value'],
             min_increment=data['min_increment'],
-            item_id=1,  # FK fixada para 1
+            description=data['description'],  # FK fixada para 1
             seller_id=1,  # FK fixada para 1
             status=data['status'],
             type_id=data['type_id'],
@@ -66,6 +66,8 @@ class AuctionService:
         if filters:
             if 'title' in filters:
                 query = query.filter(Auction.title == filters['title'])
+            if 'description' in filters:
+                query = query.filter(Auction.description == filters['description'])
             if 'type_id' in filters:
                 query = query.filter(Auction.type_id == filters['type_id'])
             if 'status' in filters:
