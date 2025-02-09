@@ -43,10 +43,10 @@ def create_auction_endpoint():
     data = request.get_json()
     required_fields = [
         'title',
+        'description',
         'end_date',
         'initial_value',
         'min_increment',
-        'item_id',
         'seller_id',
         'type_id'
     ]
@@ -80,6 +80,7 @@ def list_auctions():
         'min_bid': request.args.get('min_bid', type=float),
         'max_bid': request.args.get('max_bid', type=float),
         'end_date': request.args.get('end_date', type=str),
+        'description': request.args.get('description', type=str),
     }
 
     filters = {k: v for k, v in filters.items() if v is not None}
