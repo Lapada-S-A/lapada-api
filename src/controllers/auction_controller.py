@@ -57,6 +57,7 @@ def create_auction_endpoint():
         data['status'] = Status['PENDING']
 
         auction = auctionService.create_auction(data)
+        auctionService.add_categories_to_auction(auction.id, data.get('categories', []))
         return jsonify(auction.to_dict()), 201
     except ValueError as val_err:
         return jsonify({'error': str(val_err)}), 400
