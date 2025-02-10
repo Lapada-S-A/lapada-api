@@ -11,6 +11,7 @@ from db import db
 from models.auction import Auction
 from models.bid import Bid
 from models.status import Status
+from models.category import Category
 
 
 class AuctionService:
@@ -194,9 +195,6 @@ class AuctionService:
         """
         Associa múltiplas categorias a um leilão.
         """
-        from models.auction import Auction
-        from models.category import Category
-
         auction = Auction.query.get(auction_id)
         if not auction:
             raise ValueError("Leilão não encontrado")
