@@ -5,7 +5,7 @@ import datetime
 
 from db import db
 from models.status import Status
-
+from models.auction_category import auction_category
 
 class Auction(db.Model):
     """
@@ -42,6 +42,8 @@ class Auction(db.Model):
     )  # FK com valor fixo 1
     status = db.Column(db.Enum(Status), default=Status.PENDING, nullable=False)
 
+    categories = db.relationship('Category', secondary=auction_category, back_populates='auctions')
+
     def to_dict(self, highest_bid=None):
         """
         Convert the Auction object into a dictionary.
@@ -60,5 +62,6 @@ class Auction(db.Model):
             'seller_id': self.seller_id,
             'status': self.status.value,
             'created_date': self.created_date.strftime('%d-%m-%Y-%H-%M-%S'),
-            'highest_bid': highest_bid
+            'highest_bid': highest_bid,
+            'categories': [category.to_dict() for category in self.categories]
         }

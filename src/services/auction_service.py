@@ -11,6 +11,7 @@ from db import db
 from models.auction import Auction
 from models.bid import Bid
 from models.status import Status
+from models.category import Category
 
 
 class AuctionService:
@@ -189,3 +190,18 @@ class AuctionService:
         """
         highest_bid = db.session.query(Bid.amount).filter(Bid.auction_id == auction_id).order_by(Bid.amount.desc()).first()
         return highest_bid[0] if highest_bid else None
+    
+    def add_categories_to_auction(self, auction_id, category_ids):
+        """
+        Associa múltiplas categorias a um leilão.
+        """
+        auction = Auction.query.get(auction_id)
+        if not auction:
+            raise ValueError("Leilão não encontrado")
+
+        categories = Category.query.filter(Category.id.in_(category_ids)).all()
+        if not categories:
+            raise ValueError("Nenhuma categoria válida encontrada")
+
+        auction.categories = categories
+        db.session.commit()
