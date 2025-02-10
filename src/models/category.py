@@ -2,6 +2,7 @@
 Module for representing categorys in the database.
 """
 from db import db
+from models.auction_category import auction_category
 
 
 class Category(db.Model):
@@ -15,6 +16,8 @@ class Category(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
+
+    auctions = db.relationship('Auction', secondary=auction_category, back_populates='categories')
 
     def to_dict(self):
         """
