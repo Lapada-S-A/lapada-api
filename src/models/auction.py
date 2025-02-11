@@ -24,6 +24,7 @@ class Auction(db.Model):
         seller_id (int): Foreign key referring to the seller.
         status (Status): The status of the auction.
     """
+    __tablename__ = 'Auction'
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), nullable=False)
@@ -35,7 +36,7 @@ class Auction(db.Model):
     initial_value = db.Column(db.Float, nullable=False)
     min_increment = db.Column(db.Float, nullable=False)
     type_id = db.Column(
-        db.Integer, db.ForeignKey('type.id'), default=1, nullable=False
+        db.Integer, db.ForeignKey('Type.id'), default=1, nullable=False
     )
     seller_id = db.Column(
         db.Integer, default=1, nullable=False

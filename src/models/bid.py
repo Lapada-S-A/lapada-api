@@ -19,6 +19,7 @@ class Bid(db.Model):
         buyer_id (int): Foreign key referring to the buyer.
         bid_status_id (int): Foreign key referring to the bid status.
     """
+    __tablename__ = 'Bid'
 
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(db.Float, nullable=False)
@@ -26,13 +27,13 @@ class Bid(db.Model):
         db.DateTime, default=datetime.datetime.utcnow().date, nullable=False
     )
     auction_id = db.Column(
-        db.Integer, db.ForeignKey('auction.id'), nullable=False
+        db.Integer, db.ForeignKey('Auction.id'), nullable=False
     )
     buyer_id = db.Column(
         db.Integer, nullable=False
     )  # FK com valor fixo do comprador
     
-    bid_status_id = db.Column(db.Enum(BidStatus), default=BidStatus.ACTIVE, nullable=False)
+    bid_status = db.Column(db.Enum(BidStatus), default=BidStatus.ACTIVE, nullable=False)
 
     def to_dict(self):
         """
@@ -47,5 +48,5 @@ class Bid(db.Model):
             'bid_date': self.bid_date.strftime('%d-%m-%Y-%H-%M-%S'),
             'auction_id': self.auction_id,
             'buyer_id': self.buyer_id,
-            'bid_status_id': self.bid_status_id.value,
+            'bid_status': self.bid_status.value,
         }

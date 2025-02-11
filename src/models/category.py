@@ -13,6 +13,7 @@ class Category(db.Model):
         id (int): The primary key for the category.
         name (str): The name of the category.
     """
+    __tablename__ = 'Category'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)

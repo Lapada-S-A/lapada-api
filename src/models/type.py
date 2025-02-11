@@ -13,6 +13,7 @@ class Type(db.Model):
         name (str): The name of the type.
         description (str): A description of the type.
     """
+    __tablename__ = 'Type'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
