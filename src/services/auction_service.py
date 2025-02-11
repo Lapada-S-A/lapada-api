@@ -220,11 +220,15 @@ class AuctionService:
             try:
                 auction.end_date = datetime.fromisoformat(data['end_date'])
             except ValueError:
-                raise ValueError("Invalid date format. Use YYYY-MM-DD HH:MM:SS")
+                raise ValueError("Invalid date format.")
         if 'initial_value' in data:
             auction.initial_value = data['initial_value']
         if 'min_increment' in data:
             auction.min_increment = data['min_increment']
+        if "categories" in data:
+            category_ids = data["categories"]
+            auction.categories = Category.query.filter(Category.id.in_(category_ids)).all()
+
 
         db.session.commit()
         return auction
