@@ -205,3 +205,26 @@ class AuctionService:
 
         auction.categories = categories
         db.session.commit()
+    
+    @staticmethod
+    def update_auction(auction_id, data):
+        auction = Auction.query.get(auction_id)
+        if not auction:
+            raise ValueError("Auction not found")
+
+        if 'title' in data:
+            auction.title = data['title']
+        if 'description' in data:
+            auction.description = data['description']
+        if 'end_date' in data:
+            try:
+                auction.end_date = datetime.fromisoformat(data['end_date'])
+            except ValueError:
+                raise ValueError("Invalid date format. Use YYYY-MM-DD HH:MM:SS")
+        if 'initial_value' in data:
+            auction.initial_value = data['initial_value']
+        if 'min_increment' in data:
+            auction.min_increment = data['min_increment']
+
+        db.session.commit()
+        return auction
