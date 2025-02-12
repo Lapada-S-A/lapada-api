@@ -19,7 +19,6 @@ class Auction(db.Model):
         end_date (datetime): The ending date of the auction.
         initial_value (float): The initial value of the auction.
         min_increment (float): The minimum increment value for buyers.
-        item_id (int): Foreign key referring to the item.
         type_id (int): Foreign key referring to the type.
         buyer_id (int): Foreign key referring to the buyer.
         seller_id (int): Foreign key referring to the seller.
@@ -43,7 +42,6 @@ class Auction(db.Model):
         db.Integer, default=1, nullable=False
     )  # FK com valor fixo 1
     status = db.Column(db.Enum(Status), default=Status.PENDING, nullable=False)
-    item = db.relationship('Item', backref='auctions')
 
     categories = db.relationship('Category', secondary=auction_category, back_populates='auctions')
 

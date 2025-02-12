@@ -113,16 +113,7 @@ class AuctionService:
         Returns:
             dict: A dictionary containing auction and item details.
         """
-        auction = Auction.query.get(auction_id)
-        if auction:
-            item_details = {
-                'item_name': auction.item.name,
-                'item_description': auction.item.description
-            }
-            auction_data = auction.to_dict()
-            auction_data['item_details'] = item_details
-            return auction_data
-        return None
+        return Auction.query.get(auction_id)
 
     @staticmethod
     def get_auctions_by_status(status_id, page, per_page):
