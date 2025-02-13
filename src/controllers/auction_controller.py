@@ -58,6 +58,7 @@ def create_auction_endpoint():
         data['status'] = Status['PENDING']
 
         auction = auctionService.create_auction(data)
+        auctionService.add_categories_to_auction(auction.id, data.get('categories', []))
         return jsonify(auction.to_dict()), 201
     except ValueError as val_err:
         return jsonify({'error': str(val_err)}), 400
@@ -274,23 +275,6 @@ def get_auctions_by_seller(seller_id):
         return jsonify(auctions), 200
     except Exception as gen_err:
         return jsonify({'error': str(gen_err)}), 500
-
-@auction_bp.route('/update/<int:auction_id>', methods=['PUT'])
-def update_auction(auction_id):
-    """
-    Endpoint to update an auction.
-    """
-    data = request.get_json()
-    print(data)
-
-    try:
-        auction = auctionService.update_auction(auction_id, data)
-        return jsonify(auction.to_dict()), 200
-    except ValueError as val_err:
-        return jsonify({'error': str(val_err)}), 400
-    except Exception as gen_err:
-        return jsonify({'error': str(gen_err)}), 500
-
 
 @auction_bp.route('/update/<int:auction_id>', methods=['PUT'])
 def update_auction(auction_id):

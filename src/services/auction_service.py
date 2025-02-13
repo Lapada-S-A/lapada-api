@@ -244,7 +244,7 @@ class AuctionService:
             return auction
 
         except (ValueError) as e:
-            db.session.rollback()  # Reverte a transação se houver erro
+            db.session.rollback()
             raise Exception(f"Erro ao atualizar leilão: {str(e)}")
 
 
