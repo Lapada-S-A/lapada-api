@@ -259,3 +259,19 @@ def finish_auction(auction_id):
         return jsonify({'error': str(val_err)}), 400
     except Exception as gen_err:
         return jsonify({'error': str(gen_err)}), 500
+
+
+@auction_bp.route('/seller/<int:seller_id>', methods=['GET'])
+def get_auctions_by_seller(seller_id):
+    """
+    Endpoint to retrieve all auctions for a specific seller.
+
+    Returns:
+        JSON response with auction details or error message.
+    """
+    try:
+        auctions = auctionService.get_auctions_by_seller(seller_id)
+        return jsonify(auctions), 200
+    except Exception as gen_err:
+        return jsonify({'error': str(gen_err)}), 500
+

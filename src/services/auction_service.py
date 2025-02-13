@@ -205,3 +205,19 @@ class AuctionService:
 
         auction.categories = categories
         db.session.commit()
+
+
+    @staticmethod
+    def get_auctions_by_seller(seller_id):
+        """
+        Retrieve all auctions for a specific seller.
+
+        Args:
+            seller_id (int): The seller's ID.
+
+        Returns:
+            list: A list of dictionaries containing auction details.
+        """
+        auctions = Auction.query.filter_by(seller_id=seller_id).all()
+        
+        return [auction.to_dict() for auction in auctions]
