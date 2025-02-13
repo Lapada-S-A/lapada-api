@@ -43,6 +43,13 @@ class AuctionService:
             type_id=data['type_id'],
             created_date=datetime.now()
         )
+        categories = Category.query.filter(Category.id.in_(data.get('categories', []))).all()
+        if not categories:
+            raise ValueError("Nenhuma categoria válida encontrada")
+        if len(categories) != len(data.get('categories', [])):
+            raise ValueError("Alguma categoria não foi encontrada")
+
+        auction.categories = categories
 
         db.session.add(auction)
         db.session.commit()
@@ -191,7 +198,7 @@ class AuctionService:
         highest_bid = db.session.query(Bid.amount).filter(Bid.auction_id == auction_id).order_by(Bid.amount.desc()).first()
         return highest_bid[0] if highest_bid else None
     
-    def add_categories_to_auction(self, auction_id, category_ids):
+    def add_categories_to_auction(auction_id, category_ids):
         """
         Associa múltiplas categorias a um leilão.
         """
@@ -205,6 +212,40 @@ class AuctionService:
 
         auction.categories = categories
         db.session.commit()
+    
+    @staticmethod
+    def update_auction(auction_id, data):
+        try:
+            auction = Auction.query.get(auction_id)
+            if not auction:
+                raise ValueError("Auction not found")
+
+            if 'title' in data:
+                auction.title = data['title']
+            if 'description' in data:
+                auction.description = data['description']
+            if 'end_date' in data:
+                try:
+                    auction.end_date = datetime.fromisoformat(data['end_date'])
+                except ValueError:
+                    raise ValueError("Invalid date format.")
+            if 'initial_value' in data:
+                auction.initial_value = data['initial_value']
+            if 'min_increment' in data:
+                auction.min_increment = data['min_increment']
+            if "categories" in data:
+                category_ids = data["categories"]
+                auction.categories = Category.query.filter(Category.id.in_(category_ids)).all()
+                
+                if len(auction.categories) != len(category_ids):
+                    raise ValueError("Uma ou mais categorias informadas não existem.")
+
+            db.session.commit()
+            return auction
+
+        except (ValueError) as e:
+            db.session.rollback()  # Reverte a transação se houver erro
+            raise Exception(f"Erro ao atualizar leilão: {str(e)}")
 
 
     @staticmethod
