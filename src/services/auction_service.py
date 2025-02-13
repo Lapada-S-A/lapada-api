@@ -198,7 +198,7 @@ class AuctionService:
         highest_bid = db.session.query(Bid.amount).filter(Bid.auction_id == auction_id).order_by(Bid.amount.desc()).first()
         return highest_bid[0] if highest_bid else None
     
-    def add_categories_to_auction(auction_id, category_ids):
+    def add_categories_to_auction(self, auction_id, category_ids):
         """
         Associa múltiplas categorias a um leilão.
         """
