@@ -58,12 +58,10 @@ def list_bids_for_auction(auction_id):
     limit = request.args.get('limit', None, type=int)
 
     try:
-        # Base query to filter bids by auction_id
         query = Bid.query.filter_by(auction_id=auction_id).order_by(
             Bid.amount.desc()
         )
 
-        # Apply limit if provided
         if limit is not None:
             bids = query.limit(limit).all()
         else:
