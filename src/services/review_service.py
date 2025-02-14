@@ -3,6 +3,7 @@ from models.review import Review
 from datetime import datetime
 from sqlalchemy import func
 
+
 class ReviewService:
     """
     Service class for handling review-related operations.
@@ -132,5 +133,9 @@ class ReviewService:
         Returns:
             float or None: The average rating, or None if no reviews exist.
         """
-        avg_rating = db.session.query(func.avg(Review.rate)).filter_by(seller_id=seller_id).scalar()
+        avg_rating = (
+            db.session.query(func.avg(Review.rate))
+            .filter_by(seller_id=seller_id)
+            .scalar()
+        )
         return round(avg_rating, 2) if avg_rating is not None else None

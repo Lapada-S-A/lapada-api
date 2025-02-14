@@ -291,3 +291,27 @@ def update_auction(auction_id):
         return jsonify({'error': str(val_err)}), 400
     except Exception as gen_err:
         return jsonify({'error': str(gen_err)}), 500
+
+@auction_bp.route("/buyer/<int:buyer_id>", methods=["GET"])
+def get_auctions_by_buyer(buyer_id):
+    """
+    Endpoint para listar os leilões em que um comprador participou com lances.
+
+    Args:
+        buyer_id (int): ID do comprador.
+
+    Returns:
+        JSON: Lista paginada de leilões.
+    """
+    page = request.args.get("page", default=1, type=int)
+    per_page = request.args.get("per_page", default=10, type=int)
+
+    auctions = AuctionService.get_auctions_by_user_bids(buyer_id, page, per_page)
+
+    return jsonify({
+        "auctions": [auction.to_dict() for auction in auctions.items],
+        "total": auctions.total,
+        "page": auctions.page,
+        "per_page": auctions.per_page,
+        "pages": auctions.pages
+    })
