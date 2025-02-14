@@ -31,6 +31,9 @@ class AuctionService:
             Auction: The created auction object.
         """
         end_date = datetime.fromisoformat(data['end_date'])
+        created_date = datetime.now()
+
+        AuctionService._validate_auction_dates(created_date, end_date)
 
         auction = Auction(
             title=data['title'],
@@ -41,7 +44,7 @@ class AuctionService:
             seller_id=1,  # FK fixada para 1
             status=data['status'],
             type_id=data['type_id'],
-            created_date=datetime.now()
+            created_date=created_date
         )
         categories = Category.query.filter(Category.id.in_(data.get('categories', []))).all()
         if not categories:
@@ -227,6 +230,7 @@ class AuctionService:
             if 'end_date' in data:
                 try:
                     auction.end_date = datetime.fromisoformat(data['end_date'])
+                    AuctionService._validate_auction_dates(auction.created_date, auction.end_date)
                 except ValueError:
                     raise ValueError("Invalid date format.")
             if 'initial_value' in data:
@@ -262,3 +266,10 @@ class AuctionService:
         auctions = Auction.query.filter_by(seller_id=seller_id).all()
         
         return [auction.to_dict() for auction in auctions]
+
+    @staticmethod
+    def _validate_auction_dates(created_date, end_date):
+        if end_date < datetime.utcnow():
+            raise ValueError("A data de término não pode ser anterior ao dia de hoje.")
+        if created_date > end_date:
+            raise ValueError("A data de criação não pode ser posterior à data de término.")
