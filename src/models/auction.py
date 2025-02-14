@@ -64,5 +64,5 @@ class Auction(db.Model):
             'status': self.status.value,
             'created_date': self.created_date.strftime('%d-%m-%Y-%H-%M-%S'),
             'highest_bid': highest_bid,
-            'categories': [category.to_dict() for category in self.categories]
+            'categories': [category.to_dict().get('id') for category in self.categories]
         }
