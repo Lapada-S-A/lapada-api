@@ -138,4 +138,4 @@ class ReviewService:
             .filter_by(seller_id=seller_id)
             .scalar()
         )
-        return round(avg_rating, 2) if avg_rating is not None else 0.0
+        return round(avg_rating, 2) if avg_rating is not None else None
