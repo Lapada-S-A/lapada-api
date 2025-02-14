@@ -72,3 +72,37 @@ def list_bids_for_auction(auction_id):
         return jsonify([bid.to_dict() for bid in bids]), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
+@bid_bp.route("list/auction/<int:auction_id>/buyer/<int:buyer_id>", methods=["GET"])
+def get_bids_by_buyer_in_auction(auction_id, buyer_id):
+    """
+    Endpoint para listar todos os lances feitos por um comprador em um leilão específico.
+
+    Args:
+        auction_id (int): ID do leilão.
+        buyer_id (int): ID do comprador.
+
+    Returns:
+        JSON: Lista de lances do comprador no leilão.
+    """
+    page = request.args.get("page", default=1, type=int)
+    per_page = request.args.get("per_page", default=10, type=int)
+
+    bids = BidService.get_bids_by_buyer_in_auction(auction_id, buyer_id, page, per_page)
+
+    bids_dto = [
+        {
+            "id": bid.id,
+            "amount": bid.amount,
+            "bid_date": bid.bid_date.strftime('%d-%m-%Y-%H-%M-%S')
+        }
+        for bid in bids
+    ]
+
+    return jsonify({
+        "bids": [bid for bid in bids_dto],
+        "total": bids.total,
+        "page": bids.page,
+        "per_page": bids.per_page,
+        "pages": bids.pages
+    })
