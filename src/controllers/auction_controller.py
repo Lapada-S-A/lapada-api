@@ -309,7 +309,7 @@ def get_auctions_by_buyer(buyer_id):
     auctions = AuctionService.get_auctions_by_user_bids(buyer_id, page, per_page)
 
     return jsonify({
-        "auctions": [auction.to_dict() for auction in auctions.items],
+        "auctions": [auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) for auction in auctions.items],
         "total": auctions.total,
         "page": auctions.page,
         "per_page": auctions.per_page,
