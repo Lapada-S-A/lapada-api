@@ -9,6 +9,7 @@ class BidStatus(Enum):
     Represents the possible statuses.
     """
 
-    ACTIVE = '1'
-    EXPIRED = '2'
-    WINNER = '3'
+    ACTIVE = 1
+    EXPIRED = 2
+    WINNER = 3
+    CANCELED = 4
