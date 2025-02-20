@@ -204,8 +204,8 @@ class AuctionService:
 
         bids = Bid.query.filter(Bid.auction_id == auction_id).all()
         bid_ids = [bid.id for bid in bids]
+        print(bid_ids)
         
-        # Atualiza os lances em lote
         BidService.update_bid_statuses(bid_ids, BidStatus.CANCELED)
 
         auction.status = Status.CANCELED
