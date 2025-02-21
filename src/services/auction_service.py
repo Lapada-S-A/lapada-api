@@ -12,6 +12,9 @@ from models.auction import Auction
 from models.bid import Bid
 from models.status import Status
 from models.category import Category
+from models.bidstatus import BidStatus
+
+from services.bid_service import BidService
 
 
 class AuctionService:
@@ -40,8 +43,8 @@ class AuctionService:
             end_date=end_date,
             initial_value=data['initial_value'],
             min_increment=data['min_increment'],
-            description=data['description'],  # FK fixada para 1
-            seller_id=data['seller_id'],  # FK fixada para 1
+            description=data['description'],
+            seller_id=data['seller_id'],
             status=data['status'],
             type_id=data['type_id'],
             created_date=created_date
@@ -185,6 +188,66 @@ class AuctionService:
             raise ValueError('End date has not been reached yet.')
         auction.status = new_status
         db.session.commit()
+        return auction
+
+    @staticmethod
+    def cancel_auction(auction_id):
+        """
+        Cancela um leilão, definindo o status para CANCELED e os lances como CANCELED.
+        """
+        auction = AuctionService.get_auction_by_id(auction_id)
+        if not auction:
+            raise ValueError("Leilão não encontrado")
+        
+        if auction.status != Status.ACTIVE:
+            raise ValueError("Somente leilões ativos podem ser cancelados.")
+
+        bids = Bid.query.filter(Bid.auction_id == auction_id).all()
+        bid_ids = [bid.id for bid in bids]
+        print(bid_ids)
+        
+        BidService.update_bid_statuses(bid_ids, BidStatus.CANCELED)
+
+        auction.status = Status.CANCELED
+        db.session.add(auction)
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print(f"Erro ao salvar alterações no banco: {e}")
+        return auction
+
+    @staticmethod
+    def finish_auction(auction_id):
+        """
+        Finaliza um leilão, definindo o status para FINISHED e o maior lance como WINNER.
+        """
+        auction = AuctionService.get_auction_by_id(auction_id)
+        if not auction:
+            raise ValueError("Leilão não encontrado")
+        
+        if auction.status != Status.ACTIVE:
+            raise ValueError("Somente leilões ativos podem ser finalizados.")
+
+        highest_bid = (
+            db.session.query(Bid)
+            .filter(Bid.auction_id == auction_id)
+            .order_by(Bid.amount.desc())
+            .first()
+        )
+
+        if highest_bid:
+            BidService.update_bid_statuses([highest_bid.id], BidStatus.WINNER)
+
+        auction.status = Status.FINISHED
+        db.session.add(auction)
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print(f"Erro ao salvar alterações no banco: {e}")
         return auction
 
     @staticmethod

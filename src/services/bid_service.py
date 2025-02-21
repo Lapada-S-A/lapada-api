@@ -3,8 +3,9 @@ Module for handling bid-related services, including creating bids.
 """
 
 from db import db
-from models.bid import Bid
+from models.bid import Bid, BidStatus
 from sqlalchemy import func
+
 
 
 class BidService:
@@ -26,10 +27,16 @@ class BidService:
         auction_id = data['auction_id']
         amount = data['amount']
 
-        highest_bid = db.session.query(func.max(Bid.amount)).filter_by(auction_id=auction_id).scalar()
+        highest_bid = db.session.query(Bid).filter_by(auction_id=auction_id)\
+                                       .order_by(Bid.amount.desc())\
+                                       .first()
 
-        if highest_bid is not None and amount <= highest_bid:
-            raise ValueError(f"O lance deve ser maior que {highest_bid:.2f}")
+        if highest_bid is not None and amount <= highest_bid.amount:
+            raise ValueError(f"O lance deve ser maior que {highest_bid.amount:.2f}")
+
+        # highest_bid.bid_status = BidStatus.EXPIRED
+        # db.session.add(highest_bid)
+        db.session.query(Bid).filter_by(auction_id=auction_id).update({"bid_status": BidStatus.EXPIRED})
 
         bid = Bid(
             amount=data['amount'],
@@ -59,3 +66,11 @@ class BidService:
         return Bid.query.filter_by(auction_id=auction_id, buyer_id=buyer_id)\
                         .order_by(Bid.bid_date.desc())\
                         .paginate(page=page, per_page=per_page, error_out=False)
+    
+    @staticmethod
+    def update_bid_statuses(bid_ids, status):
+        """
+        Atualiza o status de múltiplos lances de uma vez, economizando consultas.
+        """
+        db.session.query(Bid).filter(Bid.id.in_(bid_ids)).update({Bid.bid_status: status}, synchronize_session=False)
+        db.session.commit()

@@ -92,7 +92,8 @@ def get_bids_by_buyer_in_auction(auction_id, buyer_id):
         {
             "id": bid.id,
             "amount": bid.amount,
-            "bid_date": bid.bid_date.strftime('%d-%m-%Y-%H-%M-%S')
+            "bid_date": bid.bid_date.strftime('%d-%m-%Y-%H-%M-%S'),
+            "bid_status": bid.bid_status.value
         }
         for bid in bids
     ]

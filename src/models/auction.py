@@ -40,7 +40,7 @@ class Auction(db.Model):
     )
     seller_id = db.Column(
         db.Integer, default=1, nullable=False
-    )  # FK com valor fixo 1
+    )
     status = db.Column(db.Enum(Status), default=Status.PENDING, nullable=False)
 
     categories = db.relationship('Category', secondary=auction_category, back_populates='auctions')
