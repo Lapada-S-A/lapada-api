@@ -9,6 +9,7 @@ from controllers.bid_controller import bid_bp
 from controllers.type_controller import type_bp
 from controllers.category_controller import category_bp
 from controllers.review_controller import review_bp
+from controllers.chat_controller import chat_bp
 
 routes = Blueprint('routes', __name__)
 
@@ -18,3 +19,4 @@ routes.register_blueprint(bid_bp)
 routes.register_blueprint(type_bp)
 routes.register_blueprint(category_bp)
 routes.register_blueprint(review_bp)
+routes.register_blueprint(chat_bp)
