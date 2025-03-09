@@ -71,3 +71,47 @@ def get_type_by_id(type_id):
         return jsonify(type_obj.to_dict()), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
+@type_bp.route('/update/<int:type_id>', methods=['PUT'])
+def update_type(type_id):
+    """
+    Endpoint to update an existing type.
+
+    Request Body:
+        {
+            "name": "Updated Name",
+            "description": "Updated Description"
+        }
+
+    Returns:
+        JSON response with the updated type or an error message.
+    """
+    data = request.get_json()
+
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+
+    try:
+        updated_type = type_service.update_type(type_id, data)
+        if not updated_type:
+            return jsonify({'error': 'Type not found'}), 404
+        return jsonify(updated_type.to_dict()), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+
+@type_bp.route('/delete/<int:type_id>', methods=['DELETE'])
+def delete_type(type_id):
+    """
+    Endpoint to delete a type.
+
+    Returns:
+        JSON response confirming deletion or an error message.
+    """
+    try:
+        result = type_service.delete_type(type_id)
+        if 'error' in result:
+            return jsonify({'error': result['error']}), 400
+        return jsonify({'message': 'Type deleted successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
