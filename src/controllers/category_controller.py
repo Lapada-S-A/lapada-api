@@ -66,3 +66,46 @@ def get_category_by_id(category_id):
         return jsonify(category_obj.to_dict()), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
+@category_bp.route('/update/<int:category_id>', methods=['PUT'])
+def update_category(category_id):
+    """
+    Endpoint to update a category's details.
+
+    Request Body:
+        {
+            "name": "Updated Category Name"
+        }
+
+    Returns:
+        JSON response confirming update or an error message.
+    """
+    data = request.get_json()
+
+    if not data or 'name' not in data:
+        return jsonify({'error': 'Invalid input, missing required fields'}), 400
+
+    try:
+        result = category_service.update_category(category_id, data)
+        if 'error' in result:
+            return jsonify({'error': result['error']}), 404
+        return jsonify({'category': result['category']}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+
+@category_bp.route('/delete/<int:category_id>', methods=['DELETE'])
+def delete_category(category_id):
+    """
+    Endpoint to delete a category only if it has no associated auctions.
+
+    Returns:
+        JSON response confirming deletion or an error message.
+    """
+    try:
+        result = category_service.delete_category(category_id)
+        if 'error' in result:
+            return jsonify({'error': result['error']}), 400
+        return jsonify({'message': 'Category deleted successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
