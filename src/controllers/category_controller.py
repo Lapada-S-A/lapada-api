@@ -41,32 +41,37 @@ def list_categories():
     """
     Endpoint to list all categories with pagination and ordering.
 
-    Query Parameters:
+    Query Params:
         - page (int): Page number (default: 1)
-        - per_page (int): Number of items per page (default: 10)
-        - order_by (str): Field to order by ('id' or 'name', default: 'id')
-        - order (str): Order direction ('asc' or 'desc', default: 'asc')
+        - per_page (int): Items per page (default: 10)
+        - order_by (str): Field to order by ('id' or 'name')
+        - order_asc (bool): If true, order ascending (default: false)
+        - order_desc (bool): If true, order descending (default: false)
 
     Returns:
-        JSON response with the list of categories or an error message.
+        JSON response with paginated list of categories.
     """
     try:
         page = request.args.get('page', default=1, type=int)
         per_page = request.args.get('per_page', default=10, type=int)
         order_by = request.args.get('order_by', default='id', type=str)
-        order = request.args.get('order', default='asc', type=str)
+        order_asc = request.args.get('order_asc', default='false', type=str).lower() == 'true'
+        order_desc = request.args.get('order_desc', default='false', type=str).lower() == 'true'
 
-        categories_paginated = category_service.get_all_categories(page, per_page, order_by, order)
-        
+        categories_pagination = CategoryService.get_all_categories(page, per_page, order_by, order_asc, order_desc)
+
         return jsonify({
-            'categories': [c.to_dict() for c in categories_paginated.items],
-            'total': categories_paginated.total,
-            'page': categories_paginated.page,
-            'per_page': categories_paginated.per_page,
-            'pages': categories_paginated.pages
+            'categories': [c.to_dict() for c in categories_pagination.items],
+            'total': categories_pagination.total,
+            'page': categories_pagination.page,
+            'per_page': categories_pagination.per_page,
+            'pages': categories_pagination.pages
         }), 200
+
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({'error': str(e)}), 500
 
 
 

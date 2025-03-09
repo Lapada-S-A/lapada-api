@@ -1,5 +1,6 @@
 from db import db
 from models.category import Category
+from sqlalchemy import asc, desc
 
 class CategoryService:
     """
@@ -27,34 +28,37 @@ class CategoryService:
         return category
     
     @staticmethod
-    def get_all_categories(page=1, per_page=10, order_by='id', order='asc'):
+    def get_all_categories(page, per_page, order_by, order_asc, order_desc):
         """
-        Retrieve all categories with pagination and ordering.
+        Retrieve paginated categories with ordering.
 
         Args:
             page (int): Page number.
-            per_page (int): Items per page.
+            per_page (int): Number of items per page.
             order_by (str): Field to order by ('id' or 'name').
-            order (str): Order direction ('asc' or 'desc').
+            order_asc (bool): Whether to sort in ascending order.
+            order_desc (bool): Whether to sort in descending order.
 
         Returns:
-            Pagination object containing category objects.
+            Pagination object with categories.
         """
-        valid_order_fields = ['id', 'name']
-        valid_order_directions = ['asc', 'desc']
-        
-        if order_by not in valid_order_fields:
-            order_by = 'id'
-        if order not in valid_order_directions:
-            order = 'asc'
-        
-        column = getattr(Category, order_by)
-        if order == 'desc':
-            column = column.desc()
-        
-        return Category.query.order_by(column).paginate(page=page, per_page=per_page, error_out=False)
-    
-    @staticmethod
+        if order_by not in ['id', 'name']:
+            raise ValueError("Invalid order_by value. Use 'id' or 'name'.")
+
+        if order_asc and order_desc:
+            raise ValueError("Cannot set both order_asc and order_desc to true.")
+
+        query = Category.query
+
+        if order_asc:
+            query = query.order_by(asc(getattr(Category, order_by)))
+        elif order_desc:
+            query = query.order_by(desc(getattr(Category, order_by)))
+        else:
+            query = query.order_by(asc(Category.id))  # Ordem padrão
+
+        return query.paginate(page=page, per_page=per_page, error_out=False)
+
     def get_category_by_id(category_id):
         """
         Retrieve a category by its ID.
