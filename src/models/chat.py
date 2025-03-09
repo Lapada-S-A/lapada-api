@@ -35,7 +35,7 @@ def create_message(message_id, chat_id, sender_id, content):
         "chat_id": chat_id,
         "sender_id": sender_id,
         "content": content,
-        "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "date": datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
     }
     redis_client.set(f"message:{message_id}", json.dumps(message))
     redis_client.rpush(f"chat:{chat_id}:messages", message_id)  

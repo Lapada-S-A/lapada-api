@@ -1,7 +1,7 @@
 from datetime import datetime
 import json
 from flask import Blueprint, request, jsonify
-from flask_socketio import SocketIO, emit
+from flask_socketio import emit, join_room
 
 from models.chat import create_chat, get_chat, create_message, get_messages_from_chat, redis_client
 from socketio_instance import socketio
@@ -21,6 +21,35 @@ def create_chat_route():
 
     return jsonify({"chat_id": chat_id, "users": users}), 201
 
+@chat_bp.route("/<int:user_id>", methods=["GET"])
+def get_chats_by_user(user_id):
+    all_chats = redis_client.keys("chat:*")
+    
+    user_chats = []
+    
+    for chat_key in all_chats:
+        if ":messages" in chat_key:
+            continue  
+
+        if redis_client.type(chat_key) != 'string':
+            continue  
+
+        chat_data = redis_client.get(chat_key)
+        if chat_data is None:
+            continue  
+
+        try:
+            chat_data = json.loads(chat_data)
+            if user_id in chat_data["users"]:
+                user_chats.append(chat_data)
+        except json.JSONDecodeError:
+            continue  
+    
+    if not user_chats:
+        return jsonify({"message": "Nenhum chat encontrado para este usuário"}), 404
+    
+    return jsonify(user_chats), 200
+
 @chat_bp.route("/message", methods=["POST"])
 def send_message_route():
     data = request.json
@@ -38,7 +67,7 @@ def send_message_route():
     message_id = len(redis_client.keys("message:*")) + 1
     create_message(message_id, chat_id, sender_id, content)
     
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    current_time = datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
     chat["last_message"] = {"message_id": message_id, "sender_id": sender_id, "content": content, "date": current_time}
     redis_client.set(f"chat:{chat_id}", json.dumps(chat))
 
@@ -48,7 +77,7 @@ def send_message_route():
         'sender_id': sender_id,
         'content': content,
         'date': current_time
-    })
+    }, room=f'chat_{chat_id}')
 
     return jsonify({
         "message_id": message_id,
@@ -73,3 +102,10 @@ def handle_connect():
 @socketio.on('disconnect')
 def handle_disconnect():
     emit('status', {'msg': 'Cliente desconectado'})
+
+@socketio.on('join_chat')
+def handle_join_chat(data):
+    chat_id = data.get('chat_id')
+    
+    if chat_id:
+        join_room(f'chat_{chat_id}')
