@@ -11,6 +11,5 @@ python-dotenv
 flask-cors
 coverage==7.5.1
 flask-socketio
-flask-socketio
 redis
 eventlet

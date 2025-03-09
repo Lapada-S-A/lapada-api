@@ -1,9 +1,13 @@
 from datetime import datetime
 import json
 from flask import Blueprint, request, jsonify
+from flask_socketio import SocketIO, emit
+
 from models.chat import create_chat, get_chat, create_message, get_messages_from_chat, redis_client
+from socketio_instance import socketio
 
 chat_bp = Blueprint("chat", __name__, url_prefix='/chat')
+
 
 @chat_bp.route("/create", methods=["POST"])
 def create_chat_route():
@@ -38,6 +42,14 @@ def send_message_route():
     chat["last_message"] = {"message_id": message_id, "sender_id": sender_id, "content": content, "date": current_time}
     redis_client.set(f"chat:{chat_id}", json.dumps(chat))
 
+    socketio.emit('new_message', {
+        'chat_id': chat_id,
+        'message_id': message_id,
+        'sender_id': sender_id,
+        'content': content,
+        'date': current_time
+    })
+
     return jsonify({
         "message_id": message_id,
         "sender_id": sender_id,
@@ -53,3 +65,11 @@ def get_messages_route(chat_id):
 
     messages = get_messages_from_chat(chat_id)
     return jsonify(messages)
+
+@socketio.on('connect')
+def handle_connect():
+    emit('status', {'msg': 'Cliente conectado'})
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    emit('status', {'msg': 'Cliente desconectado'})

@@ -1,4 +1,7 @@
 from datetime import datetime
+import redis
+import json
+from datetime import datetime
 
 class Chat:
     def __init__(self, chat_id, users, last_message):
@@ -13,10 +16,6 @@ class Message:
         self.content = content
         self.date = date or datetime.now()
 
-
-import redis
-import json
-from datetime import datetime
 
 redis_client = redis.StrictRedis(host="localhost", port=6379, db=0, decode_responses=True)
 
@@ -40,7 +39,7 @@ def create_message(message_id, chat_id, sender_id, content):
     }
     redis_client.set(f"message:{message_id}", json.dumps(message))
     redis_client.rpush(f"chat:{chat_id}:messages", message_id)  
-    
+
 def get_messages_from_chat(chat_id):
     message_ids = redis_client.lrange(f"chat:{chat_id}:messages", 0, -1)
     messages = []
