@@ -39,16 +39,35 @@ def create_category_endpoint():
 @category_bp.route('/list', methods=['GET'])
 def list_categories():
     """
-    Endpoint to list all categories.
+    Endpoint to list all categories with pagination and ordering.
+
+    Query Parameters:
+        - page (int): Page number (default: 1)
+        - per_page (int): Number of items per page (default: 10)
+        - order_by (str): Field to order by ('id' or 'name', default: 'id')
+        - order (str): Order direction ('asc' or 'desc', default: 'asc')
 
     Returns:
         JSON response with the list of categories or an error message.
     """
     try:
-        categories = category_service.get_all_categories()
-        return jsonify([c.to_dict() for c in categories]), 200
+        page = request.args.get('page', default=1, type=int)
+        per_page = request.args.get('per_page', default=10, type=int)
+        order_by = request.args.get('order_by', default='id', type=str)
+        order = request.args.get('order', default='asc', type=str)
+
+        categories_paginated = category_service.get_all_categories(page, per_page, order_by, order)
+        
+        return jsonify({
+            'categories': [c.to_dict() for c in categories_paginated.items],
+            'total': categories_paginated.total,
+            'page': categories_paginated.page,
+            'per_page': categories_paginated.per_page,
+            'pages': categories_paginated.pages
+        }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
 
 
 @category_bp.route('/list/<int:category_id>', methods=['GET'])

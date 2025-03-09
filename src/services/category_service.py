@@ -27,14 +27,32 @@ class CategoryService:
         return category
     
     @staticmethod
-    def get_all_categories():
+    def get_all_categories(page=1, per_page=10, order_by='id', order='asc'):
         """
-        Retrieve all categories.
+        Retrieve all categories with pagination and ordering.
+
+        Args:
+            page (int): Page number.
+            per_page (int): Items per page.
+            order_by (str): Field to order by ('id' or 'name').
+            order (str): Order direction ('asc' or 'desc').
 
         Returns:
-            list: List of all category objects.
+            Pagination object containing category objects.
         """
-        return Category.query.all()
+        valid_order_fields = ['id', 'name']
+        valid_order_directions = ['asc', 'desc']
+        
+        if order_by not in valid_order_fields:
+            order_by = 'id'
+        if order not in valid_order_directions:
+            order = 'asc'
+        
+        column = getattr(Category, order_by)
+        if order == 'desc':
+            column = column.desc()
+        
+        return Category.query.order_by(column).paginate(page=page, per_page=per_page, error_out=False)
     
     @staticmethod
     def get_category_by_id(category_id):
