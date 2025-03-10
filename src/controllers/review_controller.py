@@ -15,7 +15,7 @@ def create_review():
     required_fields = ["rate", "buyer_id", "seller_id"]
 
     if not all(field in data for field in required_fields):
-        return jsonify({"error": "Missing required fields"}), 400
+        return jsonify({"message": "Missing required fields"}), 400
 
     review = ReviewService.create_review(data)
     return (
@@ -40,7 +40,7 @@ def get_review_by_id(review_id):
     """
     review = ReviewService.get_review_by_id(review_id)
     if not review:
-        return jsonify({"error": "Review not found"}), 404
+        return jsonify({"message": "Review not found"}), 404
 
     return jsonify(review.to_dict()), 200
 
@@ -53,7 +53,7 @@ def update_review(review_id):
     data = request.get_json()
     review = ReviewService.update_review(review_id, data)
     if not review:
-        return jsonify({"error": "Review not found"}), 404
+        return jsonify({"message": "Review not found"}), 404
 
     return (
         jsonify({"message": "Review updated successfully", "review": review.to_dict()}),
@@ -68,7 +68,7 @@ def delete_review(review_id):
     """
     success = ReviewService.delete_review(review_id)
     if not success:
-        return jsonify({"error": "Review not found"}), 404
+        return jsonify({"message": "Review not found"}), 404
 
     return jsonify({"message": "Review deleted successfully"}), 200
 

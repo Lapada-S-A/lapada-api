@@ -33,7 +33,7 @@ def create_bid_endpoint():
     required_fields = ['amount', 'auction_id', 'buyer_id']
     if not data or not all(field in data for field in required_fields):
         return (
-            jsonify({'error': 'Invalid input, missing required fields'}),
+            jsonify({'message': 'Invalid input, missing required fields'}),
             400,
         )
 
@@ -41,7 +41,7 @@ def create_bid_endpoint():
         bid = bidService.create_bid(data)
         return jsonify(bid.to_dict()), 201
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({'message': str(e)}), 400
 
 
 @bid_bp.route('/list/<int:auction_id>', methods=['GET'])
@@ -69,7 +69,7 @@ def list_bids_for_auction(auction_id):
 
         return jsonify([bid.to_dict() for bid in bids]), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({'message': str(e)}), 400
 
 @bid_bp.route("list/auction/<int:auction_id>/buyer/<int:buyer_id>", methods=["GET"])
 def get_bids_by_buyer_in_auction(auction_id, buyer_id):

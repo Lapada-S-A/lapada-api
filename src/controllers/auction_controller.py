@@ -61,9 +61,9 @@ def create_auction_endpoint():
         auctionService.add_categories_to_auction(auction.id, data.get('categories', []))
         return jsonify(auction.to_dict()), 201
     except ValueError as val_err:
-        return jsonify({'error': str(val_err)}), 400
+        return jsonify({'message': str(val_err)}), 400
     except Exception as gen_err:
-        return jsonify({'error': str(gen_err)}), 500
+        return jsonify({'message': str(gen_err)}), 500
 
 
 @auction_bp.route('/list', methods=['GET'])
@@ -106,7 +106,7 @@ def list_auctions():
         return jsonify(response), 200
 
     except Exception as gen_err:
-        return jsonify({'error': str(gen_err)}), 500
+        return jsonify({'message': str(gen_err)}), 500
 
 
 @auction_bp.route('/list/<int:auction_id>', methods=['GET'])
@@ -121,9 +121,9 @@ def get_auction(auction_id):
         auction = auctionService.get_auction_by_id(auction_id)
         if auction:
             return jsonify(auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id))), 200
-        return jsonify({'error': 'Auction not found'}), 404
+        return jsonify({'message': 'Auction not found'}), 404
     except Exception as gen_err:
-        return jsonify({'error': str(gen_err)}), 500
+        return jsonify({'message': str(gen_err)}), 500
 
 
 @auction_bp.route('/list_by_status/<int:status_id>', methods=['GET'])
@@ -158,7 +158,7 @@ def fetch_auctions_by_status(status_id):
         return jsonify(response), 200
 
     except Exception as gen_err:
-        return jsonify({'error': str(gen_err)}), 500
+        return jsonify({'message': str(gen_err)}), 500
 
 
 @auction_bp.route('/user/<int:user_id>', methods=['GET'])
@@ -191,7 +191,7 @@ def get_auctions_by_user_bids(user_id):
         return jsonify(response), 200
 
     except Exception as gen_err:
-        return jsonify({'error': str(gen_err)}), 500
+        return jsonify({'message': str(gen_err)}), 500
 
 @auction_bp.route('/approve/<int:auction_id>', methods=['POST'])
 def approve_auction(auction_id):
@@ -206,9 +206,9 @@ def approve_auction(auction_id):
         auction = auctionService.update_auction_status(auction, Status.ACTIVE, Status.PENDING)
         return jsonify(auction.to_dict()), 201
     except ValueError as val_err:
-        return jsonify({'error': str(val_err)}), 400
+        return jsonify({'message': str(val_err)}), 400
     except Exception as gen_err:
-        return jsonify({'error': str(gen_err)}), 500
+        return jsonify({'message': str(gen_err)}), 500
 
 @auction_bp.route('/reject/<int:auction_id>', methods=['POST'])
 def reject_auction(auction_id):
@@ -223,9 +223,9 @@ def reject_auction(auction_id):
         auction = auctionService.update_auction_status(auction, Status.REJECTED, Status.PENDING)
         return jsonify(auction.to_dict()), 201
     except ValueError as val_err:
-        return jsonify({'error': str(val_err)}), 400
+        return jsonify({'message': str(val_err)}), 400
     except Exception as gen_err:
-        return jsonify({'error': str(gen_err)}), 500
+        return jsonify({'message': str(gen_err)}), 500
     
 @auction_bp.route('/finish/<int:auction_id>', methods=['PATCH'])
 def finish_auction(auction_id):
@@ -236,9 +236,9 @@ def finish_auction(auction_id):
         auction = auctionService.finish_auction(auction_id)
         return jsonify(auction.to_dict()), 201
     except ValueError as val_err:
-        return jsonify({'error': str(val_err)}), 400
+        return jsonify({'message': str(val_err)}), 400
     except Exception as gen_err:
-        return jsonify({'error': str(gen_err)}), 500
+        return jsonify({'message': str(gen_err)}), 500
 
 
 @auction_bp.route('/cancel/<int:auction_id>', methods=['PATCH'])
@@ -250,9 +250,9 @@ def cancel_auction(auction_id):
         auction = auctionService.cancel_auction(auction_id)
         return jsonify(auction.to_dict()), 201
     except ValueError as val_err:
-        return jsonify({'error': str(val_err)}), 400
+        return jsonify({'message': str(val_err)}), 400
     except Exception as gen_err:
-        return jsonify({'error': str(gen_err)}), 500
+        return jsonify({'message': str(gen_err)}), 500
 
 
 @auction_bp.route('/seller/<int:seller_id>', methods=['GET'])
@@ -267,7 +267,7 @@ def get_auctions_by_seller(seller_id):
         auctions = auctionService.get_auctions_by_seller(seller_id)
         return jsonify(auctions), 200
     except Exception as gen_err:
-        return jsonify({'error': str(gen_err)}), 500
+        return jsonify({'message': str(gen_err)}), 500
 
 @auction_bp.route('/update/<int:auction_id>', methods=['PUT'])
 def update_auction(auction_id):
@@ -281,9 +281,9 @@ def update_auction(auction_id):
         auction = auctionService.update_auction(auction_id, data)
         return jsonify(auction.to_dict()), 200
     except ValueError as val_err:
-        return jsonify({'error': str(val_err)}), 400
+        return jsonify({'message': str(val_err)}), 400
     except Exception as gen_err:
-        return jsonify({'error': str(gen_err)}), 500
+        return jsonify({'message': str(gen_err)}), 500
 
 @auction_bp.route("/buyer/<int:buyer_id>", methods=["GET"])
 def get_auctions_by_buyer(buyer_id):
