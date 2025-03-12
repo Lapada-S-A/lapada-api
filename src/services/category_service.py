@@ -57,6 +57,9 @@ class CategoryService:
         else:
             query = query.order_by(asc(Category.id))  # Ordem padrão
 
+        if page is None or per_page is None:
+            return query.all()
+
         return query.paginate(page=page, per_page=per_page, error_out=False)
 
     def get_category_by_id(category_id):

@@ -33,19 +33,19 @@ class TypeService:
         return new_type
 
     @staticmethod
-    def get_all_types(page, per_page, order_by, order_asc, order_desc):
+    def get_all_types(page=None, per_page=None, order_by='id', order_asc=False, order_desc=False):
         """
-        Retrieve paginated categories with ordering.
+        Retrieve categories with ordering, with optional pagination.
 
         Args:
-            page (int): Page number.
-            per_page (int): Number of items per page.
+            page (int, optional): Page number. If None, returns all results.
+            per_page (int, optional): Number of items per page. If None, returns all results.
             order_by (str): Field to order by ('id' or 'name').
             order_asc (bool): Whether to sort in ascending order.
             order_desc (bool): Whether to sort in descending order.
 
         Returns:
-            Pagination object with categories.
+            Pagination object if pagination is enabled, otherwise a list of Type objects.
         """
         if order_by not in ['id', 'name']:
             raise ValueError("Invalid order_by value. Use 'id' or 'name'.")
@@ -61,6 +61,9 @@ class TypeService:
             query = query.order_by(desc(getattr(Type, order_by)))
         else:
             query = query.order_by(asc(Type.id))  # Ordem padrão
+
+        if page is None or per_page is None:
+            return query.all()
 
         return query.paginate(page=page, per_page=per_page, error_out=False)
 
