@@ -46,36 +46,40 @@ def list_types():
     Endpoint to list all types with pagination and ordering.
 
     Query Params:
-        - page (int): Page number (default: 1)
-        - per_page (int): Items per page (default: 10)
+        - page (int): Page number (default: None)
+        - per_page (int): Items per page (default: None)
         - order_by (str): Field to order by ('id' or 'name')
         - order_asc (bool): If true, order ascending (default: false)
         - order_desc (bool): If true, order descending (default: false)
 
     Returns:
-        JSON response with paginated list of types.
+        JSON response with either a simple list or paginated types.
     """
     try:
-        page = request.args.get('page', default=1, type=int)
-        per_page = request.args.get('per_page', default=10, type=int)
+        page = request.args.get('page', type=int)
+        per_page = request.args.get('per_page', type=int)
         order_by = request.args.get('order_by', default='id', type=str)
         order_asc = request.args.get('order_asc', default='false', type=str).lower() == 'true'
         order_desc = request.args.get('order_desc', default='false', type=str).lower() == 'true'
 
-        types_pagination = TypeService.get_all_types(page, per_page, order_by, order_asc, order_desc)
+        types = TypeService.get_all_types(page, per_page, order_by, order_asc, order_desc)
+        
+        if page is None or per_page is None:
+            return jsonify([t.to_dict() for t in types]), 200
 
         return jsonify({
-            'types': [c.to_dict() for c in types_pagination.items],
-            'total': types_pagination.total,
-            'page': types_pagination.page,
-            'per_page': types_pagination.per_page,
-            'pages': types_pagination.pages
+            'types': [t.to_dict() for t in types.items],
+            'total': types.total,
+            'page': types.page,
+            'per_page': types.per_page,
+            'pages': types.pages
         }), 200
 
     except ValueError as ve:
         return jsonify({'error': str(ve)}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @type_bp.route('/list/<int:type_id>', methods=['GET'])
 def get_type_by_id(type_id):
