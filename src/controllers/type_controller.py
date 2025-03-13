@@ -30,7 +30,7 @@ def create_type_endpoint():
     required_fields = ['name', 'description']
     if not data or not all(field in data for field in required_fields):
         return (
-            jsonify({'message': 'Invalid input, missing required fields'}),
+            jsonify({'message': 'Input inválido, campos obrigatórios faltando'}),
             400,
         )
 
@@ -92,7 +92,7 @@ def get_type_by_id(type_id):
     try:
         type_obj = type_service.get_type_by_id(type_id)
         if not type_obj:
-            return jsonify({'message': 'Type not found'}), 404
+            return jsonify({'message': 'Tipo não encontrado'}), 404
         return jsonify(type_obj.to_dict()), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400
@@ -115,12 +115,12 @@ def update_type(type_id):
      data = request.get_json()
  
      if not data:
-         return jsonify({'error': 'No data provided'}), 400
+         return jsonify({'error': 'Nenhum dado foi fornecido'}), 400
  
      try:
          updated_type = type_service.update_type(type_id, data)
          if not updated_type:
-             return jsonify({'error': 'Type not found'}), 404
+             return jsonify({'error': 'Tipo não encontrado'}), 404
          return jsonify(updated_type.to_dict()), 200
      except Exception as e:
          return jsonify({'error': str(e)}), 400
@@ -138,6 +138,6 @@ def delete_type(type_id):
          result = type_service.delete_type(type_id)
          if 'error' in result:
              return jsonify({'error': result['error']}), 400
-         return jsonify({'message': 'Type deleted successfully'}), 200
+         return jsonify({'message': 'Tipo deletado com sucesso'}), 200
      except Exception as e:
          return jsonify({'error': str(e)}), 400

@@ -27,7 +27,7 @@ def create_category_endpoint():
     data = request.get_json()
 
     if not data or 'name' not in data:
-        return jsonify({'message': 'Invalid input, missing required fields'}), 400
+        return jsonify({'message': 'Input inválido, campos obrigatórios faltando'}), 400
 
     try:
         new_category = category_service.create_category(data)
@@ -90,7 +90,7 @@ def get_category_by_id(category_id):
     try:
         category_obj = category_service.get_category_by_id(category_id)
         if not category_obj:
-            return jsonify({'message': 'Category not found'}), 404
+            return jsonify({'message': 'Categoria não encontrada'}), 404
         return jsonify(category_obj.to_dict()), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400
@@ -111,7 +111,7 @@ def update_category(category_id):
     data = request.get_json()
 
     if not data or 'name' not in data:
-        return jsonify({'message': 'Invalid input, missing required fields'}), 400
+        return jsonify({'message': 'Input inválido, campos obrigatórios faltando'}), 400
 
     try:
         result = category_service.update_category(category_id, data)
@@ -134,6 +134,6 @@ def delete_category(category_id):
         result = category_service.delete_category(category_id)
         if 'error' in result:
             return jsonify({'message': result['error']}), 400
-        return jsonify({'message': 'Category deleted successfully'}), 200
+        return jsonify({'message': 'Categoria deletada com sucesso'}), 200
     except Exception as e:
         return jsonify({'message': str(e)}), 400

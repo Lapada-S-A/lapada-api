@@ -4,19 +4,19 @@ from sqlalchemy import asc, desc
 
 class CategoryService:
     """
-    Service class for handling category-related operations.
+    Classe de serviço para operações relacionadas a categorias.
     """
     
     @staticmethod
     def create_category(data):
         """
-        Create a new category.
+        Cria uma nova categoria.
 
         Args:
-            data (dict): Data containing category details.
+            data (dict): Dados contendo os detalhes da categoria.
 
         Returns:
-            Category: The created category object.
+            Category: O objeto da categoria criada.
         """
         category = Category(
             name=data['name']
@@ -30,23 +30,23 @@ class CategoryService:
     @staticmethod
     def get_all_categories(page, per_page, order_by, order_asc, order_desc):
         """
-        Retrieve paginated categories with ordering.
+        Recupera categorias paginadas com ordenação.
 
         Args:
-            page (int): Page number.
-            per_page (int): Number of items per page.
-            order_by (str): Field to order by ('id' or 'name').
-            order_asc (bool): Whether to sort in ascending order.
-            order_desc (bool): Whether to sort in descending order.
+            page (int): Número da página.
+            per_page (int): Número de itens por página.
+            order_by (str): Campo para ordenar ('id' ou 'name').
+            order_asc (bool): Se a ordenação será ascendente.
+            order_desc (bool): Se a ordenação será descendente.
 
         Returns:
             Pagination object with categories.
         """
         if order_by not in ['id', 'name']:
-            raise ValueError("Invalid order_by value. Use 'id' or 'name'.")
+            raise ValueError("Valor inválido para 'order_by'. Use 'id' ou 'name'.")
 
         if order_asc and order_desc:
-            raise ValueError("Cannot set both order_asc and order_desc to true.")
+            raise ValueError("Não é possível definir 'order_asc' e 'order_desc' como verdadeiros ao mesmo tempo.")
 
         query = Category.query
 
@@ -62,33 +62,34 @@ class CategoryService:
 
         return query.paginate(page=page, per_page=per_page, error_out=False)
 
+    @staticmethod
     def get_category_by_id(category_id):
         """
-        Retrieve a category by its ID.
+        Recupera uma categoria pelo seu ID.
 
         Args:
-            category_id (int): The ID of the category.
+            category_id (int): O ID da categoria.
 
         Returns:
-            Category: The category object if found, else None.
+            Category: O objeto da categoria se encontrado, senão None.
         """
         return Category.query.get(category_id)
 
     @staticmethod
     def update_category(category_id, data):
         """
-        Update a category's details.
+        Atualiza os detalhes de uma categoria.
 
         Args:
-            category_id (int): The ID of the category to update.
-            data (dict): Dictionary containing updated category details.
+            category_id (int): O ID da categoria a ser atualizada.
+            data (dict): Dicionário contendo os detalhes atualizados da categoria.
 
         Returns:
-            dict: {'success': True} if updated, {'error': 'message'} if not found.
+            dict: {'success': True} se atualizado, {'error': 'mensagem'} se não encontrado.
         """
         category = Category.query.get(category_id)
         if not category:
-            return {'error': 'Category not found'}
+            return {'error': 'Categoria não encontrada'}
 
         if 'name' in data:
             category.name = data['name']
@@ -99,21 +100,21 @@ class CategoryService:
     @staticmethod
     def delete_category(category_id):
         """
-        Delete a category only if it has no associated auctions.
+        Deleta uma categoria apenas se não tiver leilões associados.
 
         Args:
-            category_id (int): The ID of the category.
+            category_id (int): O ID da categoria.
 
         Returns:
-            dict: {'success': True} if deleted, {'error': 'message'} if not found or has dependencies.
+            dict: {'success': True} se deletado, {'error': 'mensagem'} se não encontrado ou se houver dependências.
         """
         category = Category.query.get(category_id)
         if not category:
-            return {'error': 'Category not found'}
+            return {'error': 'Categoria não encontrada'}
 
         # Verifica se há leilões associados
         if category.auctions:
-            return {'error': 'Cannot delete category. There are associated auctions.'}
+            return {'error': 'Não é possível deletar a categoria. Existem leilões associados.'}
 
         db.session.delete(category)
         db.session.commit()

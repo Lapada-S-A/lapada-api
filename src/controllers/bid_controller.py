@@ -16,13 +16,11 @@ bid_bp = Blueprint('bid', __name__, url_prefix='/bid')
 
 def send_bid_to_rabbitmq(data):
     try:
-        # Estabelece a conexão com o RabbitMQ
         connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
         channel = connection.channel()
         channel.queue_declare(queue='bids_queue')
 
-        message = json.dumps(data)  # Serializa os dados para JSON
-        # Envia a mensagem para a fila 'bids_queue'
+        message = json.dumps(data)
         channel.basic_publish(exchange='', routing_key='bids_queue', body=message)
 
         connection.close()
@@ -67,12 +65,12 @@ def create_bid_endpoint():
 
     required_fields = ['amount', 'auction_id', 'buyer_id']
     if not data or not all(field in data for field in required_fields):
-        return jsonify({'message': 'Invalid input, missing required fields'}), 400
+        return jsonify({'message': 'Input inválido, campos obrigatórios faltando'}), 400
 
     try:
         send_bid_to_rabbitmq(data)
 
-        return jsonify({'message': 'Bid successfully sent to RabbitMQ'}), 200
+        return jsonify({'message': 'Bid enviado para o RabbitMQ'}), 200
     except Exception as e:
         return jsonify({'message': str(e)}), 400
 

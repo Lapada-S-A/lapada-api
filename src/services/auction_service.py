@@ -183,9 +183,9 @@ class AuctionService:
             Auction: The updated auction object.
         """
         if expected_status and auction.status != expected_status:
-            raise ValueError(f'Auction must be {expected_status.name.lower()} to change status.')
+            raise ValueError(f'Leilão deve ser {expected_status.name.lower()} pra mudar status.')
         if expected_status  == Status.FINISHED and auction.end_date < datetime.now():
-            raise ValueError('End date has not been reached yet.')
+            raise ValueError('Data final ainda não chegou')
         auction.status = new_status
         db.session.commit()
         return auction
@@ -284,7 +284,7 @@ class AuctionService:
         try:
             auction = Auction.query.get(auction_id)
             if not auction:
-                raise ValueError("Auction not found")
+                raise ValueError("Leilão não encontrado")
 
             if 'title' in data:
                 auction.title = data['title']
@@ -295,7 +295,7 @@ class AuctionService:
                     auction.end_date = datetime.fromisoformat(data['end_date'])
                     AuctionService._validate_auction_dates(auction.created_date, auction.end_date)
                 except ValueError:
-                    raise ValueError("Invalid date format.")
+                    raise ValueError("Formato de data inválida")
             if 'initial_value' in data:
                 auction.initial_value = data['initial_value']
             if 'min_increment' in data:

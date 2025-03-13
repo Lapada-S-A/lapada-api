@@ -20,7 +20,7 @@ auction_bp = Blueprint('auction', __name__, url_prefix='/auction')
 def validate_auction_data(data, required_fields):
     """Validate auction data against required fields."""
     if not data or not all(field in data for field in required_fields):
-        raise ValueError('Invalid input, missing required fields')
+        raise ValueError('Input inválido, campos obrigatórios faltando')
 
 
 @auction_bp.route('/create', methods=['POST'])
@@ -90,11 +90,9 @@ def list_auctions():
     try:
         auctions = auctionService.get_all_auctions(page, per_page, filters)
 
-        # Se for uma lista normal, formata direto
         if isinstance(auctions, list):
             return jsonify([auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) for auction in auctions]), 200
         
-        # Caso contrário, assume que é um objeto paginado
         response = {
             'items': [auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) for auction in auctions.items],
             'pagination': {
@@ -121,7 +119,7 @@ def get_auction(auction_id):
         auction = auctionService.get_auction_by_id(auction_id)
         if auction:
             return jsonify(auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id))), 200
-        return jsonify({'message': 'Auction not found'}), 404
+        return jsonify({'message': 'Leilão não encontrado'}), 404
     except Exception as gen_err:
         return jsonify({'message': str(gen_err)}), 500
 

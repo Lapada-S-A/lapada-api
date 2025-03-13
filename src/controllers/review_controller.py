@@ -15,11 +15,11 @@ def create_review():
     required_fields = ["rate", "buyer_id", "seller_id"]
 
     if not all(field in data for field in required_fields):
-        return jsonify({"message": "Missing required fields"}), 400
+        return jsonify({"message": "Input inválido, campos obrigatórios faltando"}), 400
 
     review = ReviewService.create_review(data)
     return (
-        jsonify({"message": "Review created successfully", "review": review.to_dict()}),
+        jsonify({"message": "Review criada com sucesso", "review": review.to_dict()}),
         201,
     )
 
@@ -40,7 +40,7 @@ def get_review_by_id(review_id):
     """
     review = ReviewService.get_review_by_id(review_id)
     if not review:
-        return jsonify({"message": "Review not found"}), 404
+        return jsonify({"message": "Review não encontrada"}), 404
 
     return jsonify(review.to_dict()), 200
 
@@ -53,10 +53,10 @@ def update_review(review_id):
     data = request.get_json()
     review = ReviewService.update_review(review_id, data)
     if not review:
-        return jsonify({"message": "Review not found"}), 404
+        return jsonify({"message": "Review não encontrada"}), 404
 
     return (
-        jsonify({"message": "Review updated successfully", "review": review.to_dict()}),
+        jsonify({"message": "Review atualizada com sucesso", "review": review.to_dict()}),
         200,
     )
 
@@ -68,9 +68,9 @@ def delete_review(review_id):
     """
     success = ReviewService.delete_review(review_id)
     if not success:
-        return jsonify({"message": "Review not found"}), 404
+        return jsonify({"message": "Review não encontrada"}), 404
 
-    return jsonify({"message": "Review deleted successfully"}), 200
+    return jsonify({"message": "Review deletada com sucesso"}), 200
 
 
 @review_bp.route("/list/seller/<int:seller_id>", methods=["GET"])
@@ -100,7 +100,7 @@ def get_seller_average_rating(seller_id):
 
     if avg_rating is None:
         return (
-            jsonify({"message": "Seller has no reviews yet", "average_rating": None}),
+            jsonify({"message": "Vendedor não tem nenhuma review", "average_rating": None}),
             204,
         )
 
