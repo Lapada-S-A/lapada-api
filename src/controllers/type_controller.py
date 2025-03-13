@@ -30,7 +30,7 @@ def create_type_endpoint():
     required_fields = ['name', 'description']
     if not data or not all(field in data for field in required_fields):
         return (
-            jsonify({'error': 'Invalid input, missing required fields'}),
+            jsonify({'message': 'Invalid input, missing required fields'}),
             400,
         )
 
@@ -38,7 +38,7 @@ def create_type_endpoint():
         new_type = type_service.create_type(data)
         return jsonify(new_type.to_dict()), 201
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({'message': str(e)}), 400
 
 @type_bp.route('/list', methods=['GET'])
 def list_types():
@@ -88,7 +88,7 @@ def get_type_by_id(type_id):
     try:
         type_obj = type_service.get_type_by_id(type_id)
         if not type_obj:
-            return jsonify({'error': 'Type not found'}), 404
+            return jsonify({'message': 'Type not found'}), 404
         return jsonify(type_obj.to_dict()), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400

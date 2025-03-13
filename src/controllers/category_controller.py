@@ -27,13 +27,13 @@ def create_category_endpoint():
     data = request.get_json()
 
     if not data or 'name' not in data:
-        return jsonify({'error': 'Invalid input, missing required fields'}), 400
+        return jsonify({'message': 'Invalid input, missing required fields'}), 400
 
     try:
         new_category = category_service.create_category(data)
         return jsonify(new_category.to_dict()), 201
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({'message': str(e)}), 400
 
 
 @category_bp.route('/list', methods=['GET'])
@@ -86,7 +86,7 @@ def get_category_by_id(category_id):
     try:
         category_obj = category_service.get_category_by_id(category_id)
         if not category_obj:
-            return jsonify({'error': 'Category not found'}), 404
+            return jsonify({'message': 'Category not found'}), 404
         return jsonify(category_obj.to_dict()), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400

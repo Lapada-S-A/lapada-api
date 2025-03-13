@@ -14,7 +14,7 @@ def create_chat_route():
     data = request.json
     users = data.get("users")
     if not users or len(users) < 2:
-        return jsonify({"error": "Chat deve ter pelo menos dois usuários"}), 400
+        return jsonify({"message": "Chat deve ter pelo menos dois usuários"}), 400
 
     chat_id = len(redis_client.keys("chat:*")) + 1 
     create_chat(chat_id, users)
@@ -58,11 +58,11 @@ def send_message_route():
     content = data.get("content")
     
     if not chat_id or not sender_id or not content:
-        return jsonify({"error": "Faltando informações"}), 400
+        return jsonify({"message": "Faltando informações"}), 400
 
     chat = get_chat(chat_id)
     if not chat:
-        return jsonify({"error": "Chat não encontrado"}), 404
+        return jsonify({"message": "Chat não encontrado"}), 200
 
     message_id = len(redis_client.keys("message:*")) + 1
     create_message(message_id, chat_id, sender_id, content)
@@ -90,18 +90,18 @@ def send_message_route():
 def get_messages_route(chat_id):
     chat = get_chat(chat_id)
     if not chat:
-        return jsonify({"error": "Chat não encontrado"}), 404
+        return jsonify({"message": "Chat não encontrado"}), 404
 
     messages = get_messages_from_chat(chat_id)
     return jsonify(messages)
 
 @socketio.on('connect')
 def handle_connect():
-    emit('status', {'msg': 'Cliente conectado'})
+    emit('status', {'message': 'Cliente conectado'})
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    emit('status', {'msg': 'Cliente desconectado'})
+    emit('status', {'message': 'Cliente desconectado'})
 
 @socketio.on('join_chat')
 def handle_join_chat(data):
