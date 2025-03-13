@@ -40,20 +40,45 @@ def create_type_endpoint():
     except Exception as e:
         return jsonify({'message': str(e)}), 400
 
-
 @type_bp.route('/list', methods=['GET'])
 def list_types():
     """
-    Endpoint to list all types.
+    Endpoint to list all types with pagination and ordering.
+
+    Query Params:
+        - page (int): Page number (default: None)
+        - per_page (int): Items per page (default: None)
+        - order_by (str): Field to order by ('id' or 'name')
+        - order_asc (bool): If true, order ascending (default: false)
+        - order_desc (bool): If true, order descending (default: false)
 
     Returns:
-        JSON response with the list of types or an error message.
+        JSON response with either a simple list or paginated types.
     """
     try:
-        types = type_service.get_all_types()
-        return jsonify([t.to_dict() for t in types]), 200
+        page = request.args.get('page', type=int)
+        per_page = request.args.get('per_page', type=int)
+        order_by = request.args.get('order_by', default='id', type=str)
+        order_asc = request.args.get('order_asc', default='false', type=str).lower() == 'true'
+        order_desc = request.args.get('order_desc', default='false', type=str).lower() == 'true'
+
+        types = TypeService.get_all_types(page, per_page, order_by, order_asc, order_desc)
+        
+        if page is None or per_page is None:
+            return jsonify([t.to_dict() for t in types]), 200
+
+        return jsonify({
+            'types': [t.to_dict() for t in types.items],
+            'total': types.total,
+            'page': types.page,
+            'per_page': types.per_page,
+            'pages': types.pages
+        }), 200
+
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
-        return jsonify({'message': str(e)}), 400
+        return jsonify({'error': str(e)}), 500
 
 
 @type_bp.route('/list/<int:type_id>', methods=['GET'])
@@ -70,4 +95,49 @@ def get_type_by_id(type_id):
             return jsonify({'message': 'Type not found'}), 404
         return jsonify(type_obj.to_dict()), 200
     except Exception as e:
-        return jsonify({'message': str(e)}), 400
+        return jsonify({'error': str(e)}), 400
+
+    
+@type_bp.route('/update/<int:type_id>', methods=['PUT'])
+def update_type(type_id):
+     """
+     Endpoint to update an existing type.
+ 
+     Request Body:
+         {
+             "name": "Updated Name",
+             "description": "Updated Description"
+         }
+ 
+     Returns:
+         JSON response with the updated type or an error message.
+     """
+     data = request.get_json()
+ 
+     if not data:
+         return jsonify({'error': 'No data provided'}), 400
+ 
+     try:
+         updated_type = type_service.update_type(type_id, data)
+         if not updated_type:
+             return jsonify({'error': 'Type not found'}), 404
+         return jsonify(updated_type.to_dict()), 200
+     except Exception as e:
+         return jsonify({'error': str(e)}), 400
+ 
+ 
+@type_bp.route('/delete/<int:type_id>', methods=['DELETE'])
+def delete_type(type_id):
+     """
+     Endpoint to delete a type.
+ 
+     Returns:
+         JSON response confirming deletion or an error message.
+     """
+     try:
+         result = type_service.delete_type(type_id)
+         if 'error' in result:
+             return jsonify({'error': result['error']}), 400
+         return jsonify({'message': 'Type deleted successfully'}), 200
+     except Exception as e:
+         return jsonify({'error': str(e)}), 400
