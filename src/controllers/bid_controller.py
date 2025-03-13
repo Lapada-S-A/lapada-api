@@ -2,7 +2,9 @@
 """
 Bid module endpoints for creating and listing bids.
 """
+import json
 from flask import Blueprint, jsonify, request
+import pika
 
 from models.bid import Bid
 from services.bid_service import BidService
@@ -11,6 +13,39 @@ bidService = BidService()
 
 bid_bp = Blueprint('bid', __name__, url_prefix='/bid')
 
+
+def send_bid_to_rabbitmq(data):
+    try:
+        # Estabelece a conexão com o RabbitMQ
+        connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+        channel = connection.channel()
+        channel.queue_declare(queue='bids_queue')
+
+        message = json.dumps(data)  # Serializa os dados para JSON
+        # Envia a mensagem para a fila 'bids_queue'
+        channel.basic_publish(exchange='', routing_key='bids_queue', body=message)
+
+        connection.close()
+    except Exception as e:
+        raise Exception(f"Erro ao enviar para RabbitMQ: {str(e)}")
+    
+def consume_bid_from_rabbitmq():
+    """Consumir a mensagem do RabbitMQ e processar o lance."""
+    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    channel = connection.channel()
+    channel.queue_declare(queue='bids_queue')
+
+    def callback(ch, method, properties, body):
+        bid_data = json.loads(body)
+        try:
+            bid = bidService.create_bid(bid_data)
+            print(f"Lance processado com sucesso: {bid}")
+        except Exception as e:
+            print(f"Erro ao processar lance: {e}")
+
+    channel.basic_consume(queue='bids_queue', on_message_callback=callback, auto_ack=True)
+
+    channel.start_consuming()
 
 @bid_bp.route('/create', methods=['POST'])
 def create_bid_endpoint():
@@ -32,14 +67,12 @@ def create_bid_endpoint():
 
     required_fields = ['amount', 'auction_id', 'buyer_id']
     if not data or not all(field in data for field in required_fields):
-        return (
-            jsonify({'message': 'Invalid input, missing required fields'}),
-            400,
-        )
+        return jsonify({'message': 'Invalid input, missing required fields'}), 400
 
     try:
-        bid = bidService.create_bid(data)
-        return jsonify(bid.to_dict()), 201
+        send_bid_to_rabbitmq(data)
+
+        return jsonify({'message': 'Bid successfully sent to RabbitMQ'}), 200
     except Exception as e:
         return jsonify({'message': str(e)}), 400
 

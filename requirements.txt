@@ -13,3 +13,4 @@ coverage==7.5.1
 flask-socketio
 redis
 eventlet
+pika
