@@ -129,7 +129,6 @@ class AuctionService:
                 if 'max_bid' in filters:
                     query = query.filter(highest_bids.c.highest_bid <= filters['max_bid'])
 
-        # Se page e per_page forem passados, retorna com paginação, senão retorna lista normal
         if page is not None and per_page is not None:
             return query.paginate(page=page, per_page=per_page, error_out=False)
         return query.all()
@@ -146,8 +145,17 @@ class AuctionService:
         Returns:
             Auction: The Auction object if found, else None.
         """
-        return Auction.query.get(auction_id)
+        auction = Auction.query.get(auction_id)
+        documents = Document.query.filter_by(auctionId=auction_id).all()  # Adicionando `.all()` para obter os resultados
 
+        if not auction:
+            return None  # Retorna None se o leilão não for encontrado
+
+        return {
+            "auction": auction,
+            "documents": documents
+        }
+    
     @staticmethod
     def get_auctions_by_status(status_id, page, per_page):
         """

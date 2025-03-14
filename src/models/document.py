@@ -1,6 +1,7 @@
 from datetime import datetime
 from db import db
 
+import base64
 class Document(db.Model):
     __tablename__ = 'Document'
 
@@ -13,3 +14,17 @@ class Document(db.Model):
 
     auctionId = db.Column(db.Integer, db.ForeignKey('Auction.id'), nullable=True)
     auction = db.relationship('Auction', backref=db.backref('documents', lazy=True), lazy=True)
+
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "auctionId": self.auctionId,
+            "name": self.name,
+            "pdfData": {
+                "type": "Buffer",
+                "data": list(self.pdfData) if self.pdfData else None  # Converte bytes para lista de inteiros
+            },
+            "createdAt": self.createdAt.isoformat() if self.createdAt else None
+        }
+

@@ -131,12 +131,21 @@ def get_auction(auction_id):
         JSON response with the auction details or error message if not found.
     """
     try:
-        auction = auctionService.get_auction_by_id(auction_id)
-        if auction:
-            return jsonify(auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id))), 200
+        result = auctionService.get_auction_by_id(auction_id)
+        
+        if result:
+            auction = result["auction"]
+            documents = result["documents"]
+
+            return jsonify({
+                "auction": auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)),
+                "documents": [doc.to_dict() for doc in documents]  # Certifique-se que Document tem um método `to_dict`
+            }), 200
+
         return jsonify({'message': 'Leilão não encontrado'}), 404
     except Exception as gen_err:
         return jsonify({'message': str(gen_err)}), 500
+
 
 
 @auction_bp.route('/list_by_status/<int:status_id>', methods=['GET'])
