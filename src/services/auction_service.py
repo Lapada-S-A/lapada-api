@@ -146,10 +146,10 @@ class AuctionService:
             Auction: The Auction object if found, else None.
         """
         auction = Auction.query.get(auction_id)
-        documents = Document.query.filter_by(auctionId=auction_id).all()  # Adicionando `.all()` para obter os resultados
+        documents = Document.query.filter_by(auctionId=auction_id).all()
 
         if not auction:
-            return None  # Retorna None se o leilão não for encontrado
+            return None
 
         return {
             "auction": auction,

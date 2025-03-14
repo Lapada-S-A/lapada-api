@@ -1,7 +1,6 @@
 from datetime import datetime
 from db import db
 
-import base64
 class Document(db.Model):
     __tablename__ = 'Document'
 
@@ -23,7 +22,7 @@ class Document(db.Model):
             "name": self.name,
             "pdfData": {
                 "type": "Buffer",
-                "data": list(self.pdfData) if self.pdfData else None  # Converte bytes para lista de inteiros
+                "data": list(self.pdfData) if self.pdfData else None
             },
             "createdAt": self.createdAt.isoformat() if self.createdAt else None
         }
