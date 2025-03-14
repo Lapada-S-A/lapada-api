@@ -13,6 +13,7 @@ from models.bid import Bid
 from models.status import Status
 from models.category import Category
 from models.bidstatus import BidStatus
+from models.document import Document
 
 from services.bid_service import BidService
 
@@ -23,7 +24,7 @@ class AuctionService:
     """
 
     @staticmethod
-    def create_auction(data):
+    def create_auction(data, photos):
         """
         Create a new auction with fixed foreign keys set to 1.
 
@@ -54,10 +55,29 @@ class AuctionService:
             raise ValueError("Nenhuma categoria válida encontrada")
         if len(categories) != len(data.get('categories', [])):
             raise ValueError("Alguma categoria não foi encontrada")
-
+        
         auction.categories = categories
 
         db.session.add(auction)
+        db.session.commit()
+
+        documents = []
+        for _, photo in photos.items():
+            if photo:
+                document = Document(
+                    name=photo.filename,
+                    pdfData=photo.read(),
+                    auctionId=auction.id,
+                    isIdentityDocument=False,
+                    clientId=None
+                )
+                documents.append(document)
+
+        print(f"Auction ID: {auction.id}")
+        for document in documents:
+            print(f"Document Name: {document.name}, Auction ID: {document.auctionId}")
+            db.session.add(document)
+
         db.session.commit()
 
         return auction

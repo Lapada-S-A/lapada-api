@@ -5,6 +5,7 @@ Handles creating auctions and retrieving them based on various filters.
 """
 
 from datetime import datetime
+import json
 from flask import Blueprint, jsonify, request
 
 from models.status import Status
@@ -41,7 +42,15 @@ def create_auction_endpoint():
     Returns:
         JSON response with the created auction or error message.
     """
-    data = request.get_json()
+    data = request.form.to_dict()
+    
+    # Converte a string de 'categories' em uma lista
+    categories = json.loads(data.get('categories', '[]'))
+    
+    # Aqui você usa categories, não data.categories
+    data['categories'] = categories
+
+
     required_fields = [
         'title',
         'description',
@@ -52,18 +61,24 @@ def create_auction_endpoint():
         'type_id'
     ]
 
+    photos = {f'photo{i}': request.files.get(f'photo{i}') for i in range(1, 5)}
+
+    
+    print('AQUI ESTÁ  DATA', photos)
+
     try:
         validate_auction_data(data, required_fields)
 
         data['status'] = Status['PENDING']
 
-        auction = auctionService.create_auction(data)
+        auction = auctionService.create_auction(data, photos)
         auctionService.add_categories_to_auction(auction.id, data.get('categories', []))
         return jsonify(auction.to_dict()), 201
     except ValueError as val_err:
         return jsonify({'message': str(val_err)}), 400
     except Exception as gen_err:
         return jsonify({'message': str(gen_err)}), 500
+
 
 
 @auction_bp.route('/list', methods=['GET'])

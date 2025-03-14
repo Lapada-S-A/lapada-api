@@ -1,5 +1,5 @@
 """
-Module for handling type-related services.
+Módulo para lidar com serviços relacionados a tipos.
 """
 from db import db
 from models.auction import Auction
@@ -9,19 +9,19 @@ from sqlalchemy import asc, desc
 
 class TypeService:
     """
-    Service class for handling type-related operations.
+    Classe de serviço para operações relacionadas a tipos.
     """
 
     @staticmethod
     def create_type(data):
         """
-        Create a new type.
+        Cria um novo tipo.
 
         Args:
-            data (dict): Data containing type details.
+            data (dict): Dados contendo os detalhes do tipo.
 
         Returns:
-            Type: The created type object.
+            Type: O objeto tipo criado.
         """
         new_type = Type(
             name=data['name'],
@@ -36,23 +36,23 @@ class TypeService:
     @staticmethod
     def get_all_types(page=None, per_page=None, order_by='id', order_asc=False, order_desc=False):
         """
-        Retrieve categories with ordering, with optional pagination.
+        Recupera os tipos com ordenação, com paginação opcional.
 
         Args:
-            page (int, optional): Page number. If None, returns all results.
-            per_page (int, optional): Number of items per page. If None, returns all results.
-            order_by (str): Field to order by ('id' or 'name').
-            order_asc (bool): Whether to sort in ascending order.
-            order_desc (bool): Whether to sort in descending order.
+            page (int, opcional): Número da página. Se None, retorna todos os resultados.
+            per_page (int, opcional): Número de itens por página. Se None, retorna todos os resultados.
+            order_by (str): Campo para ordenar ('id' ou 'name').
+            order_asc (bool): Se deve ordenar em ordem crescente.
+            order_desc (bool): Se deve ordenar em ordem decrescente.
 
         Returns:
-            Pagination object if pagination is enabled, otherwise a list of Type objects.
+            Objeto de paginação, se a paginação estiver ativada, caso contrário, uma lista de objetos Type.
         """
         if order_by not in ['id', 'name']:
-            raise ValueError("Invalid order_by value. Use 'id' or 'name'.")
+            raise ValueError("Valor inválido para 'order_by'. Use 'id' ou 'name'.")
 
         if order_asc and order_desc:
-            raise ValueError("Cannot set both order_asc and order_desc to true.")
+            raise ValueError("Não é possível definir tanto 'order_asc' quanto 'order_desc' como True.")
 
         query = Type.query
 
@@ -71,59 +71,59 @@ class TypeService:
     @staticmethod
     def get_type_by_id(type_id):
         """
-        Retrieve a type by ID.
+        Recupera um tipo pelo ID.
 
         Args:
-            type_id (int): The ID of the type.
+            type_id (int): O ID do tipo.
 
         Returns:
-            Type: The type object if found, otherwise None.
+            Type: O objeto tipo se encontrado, caso contrário None.
         """
         return Type.query.get(type_id)
-    
+
     @staticmethod
     def update_type(type_id, data):
-         """
-         Update an existing type.
- 
-         Args:
-             type_id (int): The ID of the type to update.
-             data (dict): Data containing updated fields.
- 
-         Returns:
-             Type: The updated type object if found, otherwise None.
-         """
-         type_obj = Type.query.get(type_id)
-         if not type_obj:
-             return None
- 
-         if 'name' in data:
-             type_obj.name = data['name']
-         if 'description' in data:
-             type_obj.description = data['description']
- 
-         db.session.commit()
-         return type_obj
- 
+        """
+        Atualiza um tipo existente.
+
+        Args:
+            type_id (int): O ID do tipo a ser atualizado.
+            data (dict): Dados contendo os campos atualizados.
+
+        Returns:
+            Type: O objeto tipo atualizado se encontrado, caso contrário None.
+        """
+        type_obj = Type.query.get(type_id)
+        if not type_obj:
+            return None
+
+        if 'name' in data:
+            type_obj.name = data['name']
+        if 'description' in data:
+            type_obj.description = data['description']
+
+        db.session.commit()
+        return type_obj
+
     @staticmethod
     def delete_type(type_id):
-         """
-         Delete a type by ID only if it has no associated auctions.
- 
-         Args:
-             type_id (int): The ID of the type.
- 
-         Returns:
-             dict: {'success': True} if deleted, {'error': 'message'} if not found or has dependencies.
-         """
-         type_obj = Type.query.get(type_id)
-         if not type_obj:
-             return {'error': 'Type not found'}
- 
-         associated_auctions = Auction.query.filter_by(type_id=type_id).first()
-         if associated_auctions:
-             return {'error': 'Cannot delete type. There are associated auctions.'}
- 
-         db.session.delete(type_obj)
-         db.session.commit()
-         return {'success': True}
+        """
+        Deleta um tipo pelo ID, somente se não houver leilões associados.
+
+        Args:
+            type_id (int): O ID do tipo.
+
+        Returns:
+            dict: {'success': True} se deletado, {'error': 'mensagem'} se não encontrado ou se houver dependências.
+        """
+        type_obj = Type.query.get(type_id)
+        if not type_obj:
+            return {'error': 'Tipo não encontrado'}
+
+        associated_auctions = Auction.query.filter_by(type_id=type_id).first()
+        if associated_auctions:
+            return {'error': 'Não é possível deletar o tipo. Há leilões associados.'}
+
+        db.session.delete(type_obj)
+        db.session.commit()
+        return {'success': True}

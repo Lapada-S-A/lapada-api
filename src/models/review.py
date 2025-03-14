@@ -2,7 +2,7 @@ from datetime import datetime
 from db import db
 
 class Review(db.Model):
-    __tablename__ = 'review'
+    __tablename__ = 'Review'
 
     id = db.Column(db.Integer, primary_key=True)
     rate = db.Column(db.Integer, nullable=False)
