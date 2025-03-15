@@ -43,6 +43,7 @@ def create_auction_endpoint():
         JSON response with the created auction or error message.
     """
     data = request.form.to_dict()
+    print(data)
     
     categories_str = data.get('categories')
     if categories_str:
@@ -323,16 +324,18 @@ def update_auction(auction_id):
     """
     Endpoint to update an auction.
     """
-    data = request.get_json()
-    print(data)
+    data = request.form.to_dict()
+
+    photos = {f'photo{i}': request.files.get(f'photo{i}') for i in range(1, 5)}
 
     try:
-        auction = auctionService.update_auction(auction_id, data)
+        auction = auctionService.update_auction(auction_id, data, photos)
         return jsonify(auction.to_dict()), 200
     except ValueError as val_err:
         return jsonify({'message': str(val_err)}), 400
     except Exception as gen_err:
         return jsonify({'message': str(gen_err)}), 500
+
 
 @auction_bp.route("/buyer/<int:buyer_id>", methods=["GET"])
 def get_auctions_by_buyer(buyer_id):

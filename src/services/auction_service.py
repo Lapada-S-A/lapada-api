@@ -362,7 +362,7 @@ class AuctionService:
         db.session.commit()
     
     @staticmethod
-    def update_auction(auction_id, data):
+    def update_auction(auction_id, data, photos):
         try:
             auction = Auction.query.get(auction_id)
             if not auction:
@@ -385,9 +385,26 @@ class AuctionService:
             if "categories" in data:
                 category_ids = data["categories"]
                 auction.categories = Category.query.filter(Category.id.in_(category_ids)).all()
-                
+                    
                 if len(auction.categories) != len(category_ids):
                     raise ValueError("Uma ou mais categorias informadas não existem.")
+
+            for i in range(1, 5):
+                photo = photos.get(f'photo{i}')
+                if photo:
+                    existing_document = Document.query.filter_by(auctionId=auction.id, isIdentityDocument=False).offset(i-1).first()
+                    if existing_document:
+                        existing_document.pdfData = photo.read()
+                        existing_document.name = photo.filename
+                    else:
+                        document = Document(
+                            name=photo.filename,
+                            pdfData=photo.read(),
+                            auctionId=auction.id,
+                            isIdentityDocument=False,
+                            clientId=None
+                        )
+                        db.session.add(document)
 
             db.session.commit()
             return auction
@@ -395,6 +412,7 @@ class AuctionService:
         except (ValueError) as e:
             db.session.rollback()
             raise Exception(f"Erro ao atualizar leilão: {str(e)}")
+
 
     @staticmethod
     def get_auctions_by_seller(seller_id):
