@@ -44,7 +44,11 @@ def create_auction_endpoint():
     """
     data = request.form.to_dict()
     
-    categories = json.loads(data.get('categories', '[]'))
+    categories_str = data.get('categories')
+    if categories_str:
+        categories = [int(category) for category in categories_str.split(',')]
+    else:
+        categories = []
     
     data['categories'] = categories
 
@@ -79,7 +83,7 @@ def create_auction_endpoint():
 @auction_bp.route('/list', methods=['GET'])
 def list_auctions():
     """
-    Endpoint to list auctions with optional pagination and filters.
+    Endpoint to list auctions with optional pagination and filters, including documents.
     """
     page = request.args.get('page', type=int)
     per_page = request.args.get('per_page', type=int)
@@ -98,23 +102,24 @@ def list_auctions():
     filters = {k: v for k, v in filters.items() if v is not None}
 
     try:
-        auctions = auctionService.get_all_auctions(page, per_page, filters)
+        results = auctionService.get_all_auctions(page, per_page, filters)
 
-        if isinstance(auctions, list):
-            return jsonify([auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) for auction in auctions]), 200
-        
-        response = {
-            'items': [auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) for auction in auctions.items],
-            'pagination': {
-                'page': auctions.page,
-                'per_page': auctions.per_page,
-                'total': auctions.total,
-            }
-        }
-        return jsonify(response), 200
+        auctions_data = []
+        for result in results:
+            auction = result["auction"]
+            document = result["document"]
+
+            auctions_data.append({
+                "auction": auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)),
+                "document": document.to_dict()
+            })
+
+        return jsonify(auctions_data), 200
 
     except Exception as gen_err:
         return jsonify({'message': str(gen_err)}), 500
+
+
 
 
 @auction_bp.route('/list/<int:auction_id>', methods=['GET'])

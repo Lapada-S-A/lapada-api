@@ -85,7 +85,7 @@ class AuctionService:
     @staticmethod
     def get_all_auctions(page=None, per_page=None, filters=None):
         """
-        Fetch auctions with optional pagination and filters.
+        Fetch auctions with optional pagination and filters, including related documents.
 
         Args:
             page (int, optional): Page number for pagination.
@@ -93,7 +93,7 @@ class AuctionService:
             filters (dict, optional): Optional filters for query.
 
         Returns:
-            List or pagination object with filtered auctions.
+            List or pagination object with filtered auctions, including their documents.
         """
         query = Auction.query
 
@@ -130,8 +130,30 @@ class AuctionService:
                     query = query.filter(highest_bids.c.highest_bid <= filters['max_bid'])
 
         if page is not None and per_page is not None:
-            return query.paginate(page=page, per_page=per_page, error_out=False)
-        return query.all()
+            paginated_result = query.paginate(page=page, per_page=per_page, error_out=False)
+            auctions = paginated_result.items
+        else:
+            auctions = query.all()
+
+        # Para cada leilão, buscar seus documentos
+        auction_list = [
+            {
+                "auction": auction,
+                "document": Document.query.filter_by(auctionId=auction.id).first() or None
+            }
+            for auction in auctions
+        ]
+
+        if page is not None and per_page is not None:
+            return {
+                "total": paginated_result.total,
+                "page": paginated_result.page,
+                "per_page": paginated_result.per_page,
+                "items": auction_list
+            }
+
+        return auction_list
+
 
 
     @staticmethod
