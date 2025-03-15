@@ -447,7 +447,7 @@ class AuctionService:
     @staticmethod
     def get_auctions_by_categories_and_status(categories_ids, status, page=None, per_page=None):
         """
-        Fetch auctions filtered by category IDs and status (e.g., PENDING).
+        Fetch auctions filtered by category IDs and status (e.g., PENDING), including related documents.
 
         Args:
             categories_ids (list): List of category IDs to filter auctions.
@@ -456,7 +456,7 @@ class AuctionService:
             per_page (int, optional): Number of items per page.
 
         Returns:
-            Pagination or List: Paginated auctions or all auctions if no pagination.
+            Pagination or List: Paginated auctions with their documents, or all auctions if no pagination.
         """
         query = Auction.query.filter(
             Auction.status == status,
@@ -464,5 +464,26 @@ class AuctionService:
         )
 
         if page is not None and per_page is not None:
-            return query.paginate(page=page, per_page=per_page, error_out=False)
-        return query.all()
+            paginated_result = query.paginate(page=page, per_page=per_page, error_out=False)
+            auctions = paginated_result.items
+        else:
+            auctions = query.all()
+
+        # For each auction, fetch its associated document
+        auction_list = [
+            {
+                "auction": auction,
+                "document": Document.query.filter_by(auctionId=auction.id).first() or None
+            }
+            for auction in auctions
+        ]
+
+        if page is not None and per_page is not None:
+            return {
+                "total": paginated_result.total,
+                "page": paginated_result.page,
+                "per_page": paginated_result.per_page,
+                "items": auction_list
+            }
+
+        return auction_list

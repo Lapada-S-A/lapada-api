@@ -412,25 +412,49 @@ def list_auctions_by_categories():
 
     categories_ids = data['categories_ids']
 
-
     page = request.args.get('page', type=int)
     per_page = request.args.get('per_page', type=int)
 
     try:
         auctions = auctionService.get_auctions_by_categories_and_status(categories_ids, Status.PENDING, page, per_page)
 
-        if isinstance(auctions, list):
-            return jsonify([auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) for auction in auctions]), 200
-        
-        response = {
-            'items': [auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) for auction in auctions.items],
-            'pagination': {
-                'page': auctions.page,
-                'per_page': auctions.per_page,
-                'total': auctions.total,
+        # If pagination is used (auctions is a dictionary with pagination data)
+        if isinstance(auctions, dict) and 'total' in auctions:
+            auctions_data = []
+            for result in auctions['items']:  # 'items' should exist in paginated results
+                auction = result['auction']
+                document = result['document']  # Assuming 'document' is included in the results
+
+                auctions_data.append({
+                    'auction': auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) if hasattr(auction, 'to_dict') else {},
+                    'document': document.to_dict() if document and hasattr(document, 'to_dict') else None
+                })
+
+            # Return paginated results
+            response = {
+                'total': auctions['total'],
+                'page': auctions['page'],
+                'per_page': auctions['per_page'],
+                'items': auctions_data
             }
-        }
-        return jsonify(response), 200
+            return jsonify(response), 200
+
+        # If no pagination is used (auctions is just a list)
+        elif isinstance(auctions, list):
+            auctions_data = []
+            for auction in auctions:
+                document = auction.get('document')  # Assuming 'document' is part of the auction object
+
+                auctions_data.append({
+                    'auction': auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) if hasattr(auction, 'to_dict') else {},
+                    'document': document.to_dict() if document and hasattr(document, 'to_dict') else None
+                })
+
+            # Return the auctions without pagination metadata
+            return jsonify(auctions_data), 200
+
+        else:
+            return jsonify({'message': 'Unexpected response format from auction service'}), 500
 
     except Exception as gen_err:
         return jsonify({'message': str(gen_err)}), 500
