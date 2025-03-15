@@ -44,10 +44,8 @@ def create_auction_endpoint():
     """
     data = request.form.to_dict()
     
-    # Converte a string de 'categories' em uma lista
     categories = json.loads(data.get('categories', '[]'))
     
-    # Aqui você usa categories, não data.categories
     data['categories'] = categories
 
 
@@ -62,9 +60,6 @@ def create_auction_endpoint():
     ]
 
     photos = {f'photo{i}': request.files.get(f'photo{i}') for i in range(1, 5)}
-
-    
-    print('AQUI ESTÁ  DATA', photos)
 
     try:
         validate_auction_data(data, required_fields)
@@ -330,3 +325,47 @@ def get_auctions_by_buyer(buyer_id):
         "per_page": auctions.per_page,
         "pages": auctions.pages
     })
+
+@auction_bp.route('/list_by_categories', methods=['POST'])
+def list_auctions_by_categories():
+    """
+    Endpoint to fetch auctions with status 'PENDING' filtered by category IDs.
+
+    Request Body:
+        {
+            "categories_ids": [1, 2, 3]
+        }
+
+    Returns:
+        JSON response with filtered auctions or error message.
+    """
+
+    data = request.get_json()
+
+    if not data or 'categories_ids' not in data or not isinstance(data['categories_ids'], list):
+        return jsonify({'message': 'Invalid input. Categories IDs must be provided as a list.'}), 400
+
+    categories_ids = data['categories_ids']
+
+
+    page = request.args.get('page', type=int)
+    per_page = request.args.get('per_page', type=int)
+
+    try:
+        auctions = auctionService.get_auctions_by_categories_and_status(categories_ids, Status.PENDING, page, per_page)
+
+        if isinstance(auctions, list):
+            return jsonify([auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) for auction in auctions]), 200
+        
+        response = {
+            'items': [auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) for auction in auctions.items],
+            'pagination': {
+                'page': auctions.page,
+                'per_page': auctions.per_page,
+                'total': auctions.total,
+            }
+        }
+        return jsonify(response), 200
+
+    except Exception as gen_err:
+        return jsonify({'message': str(gen_err)}), 500

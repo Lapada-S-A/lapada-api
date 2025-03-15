@@ -364,3 +364,27 @@ class AuctionService:
             raise ValueError("A data de término não pode ser anterior ao dia de hoje.")
         if created_date > end_date:
             raise ValueError("A data de criação não pode ser posterior à data de término.")
+
+
+    @staticmethod
+    def get_auctions_by_categories_and_status(categories_ids, status, page=None, per_page=None):
+        """
+        Fetch auctions filtered by category IDs and status (e.g., PENDING).
+
+        Args:
+            categories_ids (list): List of category IDs to filter auctions.
+            status (Status): The status of the auctions (e.g., Status.PENDING).
+            page (int, optional): Page number for pagination.
+            per_page (int, optional): Number of items per page.
+
+        Returns:
+            Pagination or List: Paginated auctions or all auctions if no pagination.
+        """
+        query = Auction.query.filter(
+            Auction.status == status,
+            Auction.categories.any(Category.id.in_(categories_ids))
+        )
+
+        if page is not None and per_page is not None:
+            return query.paginate(page=page, per_page=per_page, error_out=False)
+        return query.all()
