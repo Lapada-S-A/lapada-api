@@ -105,22 +105,45 @@ def list_auctions():
     try:
         results = auctionService.get_all_auctions(page, per_page, filters)
 
-        auctions_data = []
-        for result in results:
-            auction = result["auction"]
-            document = result["document"]
+        # If pagination is used (results is a dictionary with pagination data)
+        if isinstance(results, dict) and "total" in results:
+            auctions_data = []
+            for result in results["items"]:  # 'items' should exist in paginated results
+                auction = result["auction"]
+                document = result["document"]
 
-            auctions_data.append({
-                "auction": auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)),
-                "document": document.to_dict()
-            })
+                auctions_data.append({
+                    "auction": auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)),
+                    "document": document.to_dict() if document else None
+                })
 
-        return jsonify(auctions_data), 200
+            # Return paginated results
+            return jsonify({
+                "total": results["total"],
+                "page": results["page"],
+                "per_page": results["per_page"],
+                "items": auctions_data
+            }), 200
+
+        # If no pagination is used (results is just a list of auctions)
+        else:
+            auctions_data = []
+            for result in results:
+                auction = result["auction"]
+                document = result["document"]
+
+                auctions_data.append({
+                    "auction": auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)),
+                    "document": document.to_dict() if document else None
+                })
+
+            # Return only the items without pagination metadata
+            return jsonify(
+                auctions_data
+            ), 200
 
     except Exception as gen_err:
         return jsonify({'message': str(gen_err)}), 500
-
-
 
 
 @auction_bp.route('/list/<int:auction_id>', methods=['GET'])
