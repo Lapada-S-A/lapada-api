@@ -179,6 +179,22 @@ class AuctionService:
         }
     
     @staticmethod
+    def get_first_document(auction_id):
+        """
+        Fetches the first document related to a specific auction.
+
+        Args:
+            auction_id (int): The ID of the auction.
+
+        Returns:
+            dict: The dictionary representation of the first document related to the auction.
+        """
+        document = Document.query.filter_by(auctionId=auction_id).first()
+        if document:
+            return document.to_dict()
+        return None
+
+    @staticmethod
     def get_auctions_by_status(status_id, page, per_page):
         """
         Fetches auctions that match the given status_id with pagination.
@@ -198,15 +214,15 @@ class AuctionService:
     @staticmethod
     def get_auctions_by_user_bids(user_id, page, per_page):
         """
-            Fetches auctions in which a user has placed bids.
+        Fetches auctions in which a user has placed bids, including one document per auction.
 
-            Args:
-                user_id (int): The ID of the user.
-                page (int): Page number.
-                per_page (int): Number of items per page.
+        Args:
+            user_id (int): The ID of the user.
+            page (int): Page number.
+            per_page (int): Number of items per page.
 
-            Returns:
-                Pagination: Paginated list of auctions.
+        Returns:
+            Pagination: Paginated list of auctions with one document per auction.
         """
 
         auctions = (
@@ -216,9 +232,25 @@ class AuctionService:
             .distinct()
             .paginate(page=page, per_page=per_page, error_out=False)
         )
-        return auctions
-    
-    
+
+        auction_list = [
+            {
+                "auction": auction,
+                "document": Document.query.filter_by(auctionId=auction.id).first()  # Pegando apenas o primeiro documento
+            }
+            for auction in auctions.items
+        ]
+
+        return {
+            "total": auctions.total,
+            "page": auctions.page,
+            "per_page": auctions.per_page,
+            "pages": auctions.pages,
+            "items": auction_list
+        }
+
+
+
     @staticmethod
     def update_auction_status(auction, new_status, expected_status=None):
         """
@@ -364,21 +396,27 @@ class AuctionService:
             db.session.rollback()
             raise Exception(f"Erro ao atualizar leilão: {str(e)}")
 
-
     @staticmethod
     def get_auctions_by_seller(seller_id):
         """
-        Retrieve all auctions for a specific seller.
+        Retrieve all auctions for a specific seller, including one document per auction.
 
         Args:
             seller_id (int): The seller's ID.
 
         Returns:
-            list: A list of dictionaries containing auction details.
+            list: A list of dictionaries containing auction details with one document per auction.
         """
         auctions = Auction.query.filter_by(seller_id=seller_id).all()
-        
-        return [auction.to_dict() for auction in auctions]
+
+        return [
+            {
+                "auction": auction,
+                "document": Document.query.filter_by(auctionId=auction.id).first()  # Pegando apenas o primeiro documento
+            }
+            for auction in auctions
+        ]
+
 
     @staticmethod
     def _validate_auction_dates(created_date, end_date):

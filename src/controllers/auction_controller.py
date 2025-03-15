@@ -151,14 +151,14 @@ def get_auction(auction_id):
 @auction_bp.route('/list_by_status/<int:status_id>', methods=['GET'])
 def fetch_auctions_by_status(status_id):
     """
-    Endpoint to fetch auctions by status_id with pagination.
+    Endpoint to fetch auctions by status_id with pagination and the first document.
 
     Query Parameters:
         page (int): The page number for pagination (default is 1).
         per_page (int): The number of items per page (default is 10).
 
     Returns:
-        JSON response with paginated list of auctions for the given status_id.
+        JSON response with paginated list of auctions for the given status_id, including the first document.
     """
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
@@ -169,11 +169,17 @@ def fetch_auctions_by_status(status_id):
         )
 
         response = {
-            'items': [auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) for auction in auctions.items],
+            'items': [
+                {
+                    'auction': auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)),
+                    'document': auctionService.get_first_document(auction.id)
+                }
+                for auction in auctions.items
+            ],
             'pagination': {
                 'page': page,
                 'per_page': per_page,
-                'total': auctions.total,  # Assuming `total` is provided by the service
+                'total': auctions.total,
             }
         }
 
@@ -181,6 +187,7 @@ def fetch_auctions_by_status(status_id):
 
     except Exception as gen_err:
         return jsonify({'message': str(gen_err)}), 500
+
 
 
 @auction_bp.route('/user/<int:user_id>', methods=['GET'])
@@ -193,20 +200,28 @@ def get_auctions_by_user_bids(user_id):
         per_page (int): The number of items per page (default is 10).
 
     Returns:
-        JSON response with paginated auctions by user.
+        JSON response with paginated auctions by user, including one document per auction.
     """
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
 
     try:
-        auctions = auctionService.get_auctions_by_user_bids(user_id, page, per_page)
+        auctions_data = auctionService.get_auctions_by_user_bids(user_id, page, per_page)
 
         response = {
-            'items': [auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) for auction in auctions.items],
+            'items': [
+                {
+                    'auction': auction_data["auction"].to_dict(
+                        highest_bid=auctionService.get_highest_bid(auction_id=auction_data["auction"].id)
+                    ),
+                    'document': auction_data["document"].to_dict() if auction_data["document"] else None
+                }
+                for auction_data in auctions_data["items"]
+            ],
             'pagination': {
-                'page': page,
-                'per_page': per_page,
-                'total': auctions.total,
+                'page': auctions_data["page"],
+                'per_page': auctions_data["per_page"],
+                'total': auctions_data["total"],
             }
         }
 
@@ -214,6 +229,7 @@ def get_auctions_by_user_bids(user_id):
 
     except Exception as gen_err:
         return jsonify({'message': str(gen_err)}), 500
+
 
 @auction_bp.route('/approve/<int:auction_id>', methods=['POST'])
 def approve_auction(auction_id):
@@ -280,16 +296,27 @@ def cancel_auction(auction_id):
 @auction_bp.route('/seller/<int:seller_id>', methods=['GET'])
 def get_auctions_by_seller(seller_id):
     """
-    Endpoint to retrieve all auctions for a specific seller.
+    Endpoint to retrieve all auctions for a specific seller, including one document per auction.
 
     Returns:
         JSON response with auction details or error message.
     """
     try:
-        auctions = auctionService.get_auctions_by_seller(seller_id)
-        return jsonify(auctions), 200
+        auctions_data = auctionService.get_auctions_by_seller(seller_id)
+
+        response = [
+            {
+                "auction": auction_data["auction"].to_dict(),
+                "document": auction_data["document"].to_dict() if auction_data["document"] else None
+            }
+            for auction_data in auctions_data
+        ]
+
+        return jsonify(response), 200
+
     except Exception as gen_err:
         return jsonify({'message': str(gen_err)}), 500
+
 
 @auction_bp.route('/update/<int:auction_id>', methods=['PUT'])
 def update_auction(auction_id):
@@ -321,15 +348,22 @@ def get_auctions_by_buyer(buyer_id):
     page = request.args.get("page", default=1, type=int)
     per_page = request.args.get("per_page", default=10, type=int)
 
-    auctions = AuctionService.get_auctions_by_user_bids(buyer_id, page, per_page)
+    auctions_data = AuctionService.get_auctions_by_user_bids(buyer_id, page, per_page)
 
     return jsonify({
-        "auctions": [auction.to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction.id)) for auction in auctions.items],
-        "total": auctions.total,
-        "page": auctions.page,
-        "per_page": auctions.per_page,
-        "pages": auctions.pages
+        "auctions": [
+            {
+                "auction": auction_data["auction"].to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction_data["auction"].id)),
+                "document": auction_data["document"].to_dict() if auction_data["document"] else None
+            }
+            for auction_data in auctions_data["items"]
+        ],
+        "total": auctions_data["total"],
+        "page": auctions_data["page"],
+        "per_page": auctions_data["per_page"],
+        "pages": auctions_data["pages"]
     })
+
 
 @auction_bp.route('/list_by_categories', methods=['POST'])
 def list_auctions_by_categories():
