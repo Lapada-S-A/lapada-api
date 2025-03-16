@@ -25,6 +25,7 @@ class ReviewService:
             comment=data.get("comment"),
             buyer_id=data["buyer_id"],
             seller_id=data["seller_id"],
+            auction_id=data["auction_id"],
             created_at=datetime.utcnow(),
         )
 
@@ -121,6 +122,19 @@ class ReviewService:
             List[Review]: List of reviews made by the buyer.
         """
         return Review.query.filter_by(buyer_id=buyer_id).all()
+    
+    @staticmethod
+    def get_review_by_auction(auction_id):
+        """
+        Get review of a specific auction.
+
+        Args:
+            auction_id (int): The ID of auction.
+
+        Returns:
+            Review: Review of the auction.
+        """
+        return Review.query.filter_by(auction_id=auction_id).all()
 
     @staticmethod
     def get_seller_average_rating(seller_id):

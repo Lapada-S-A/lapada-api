@@ -11,6 +11,7 @@ class Review(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     buyer_id = db.Column(db.Integer, nullable=False)
     seller_id = db.Column(db.Integer, nullable=False)
+    auction_id = db.Column(db.Integer, nullable=False)
 
     def to_dict(self):
         """Converte o objeto para dicionário (para JSON)."""
@@ -22,4 +23,5 @@ class Review(db.Model):
             "updated_at": self.updated_at.strftime('%d-%m-%Y-%H-%M-%S'),
             "buyer_id": self.buyer_id,
             "seller_id": self.seller_id,
+            "auction_id": self.auction_id,
         }

@@ -90,6 +90,13 @@ def get_reviews_by_buyer(buyer_id):
     reviews = ReviewService.get_reviews_by_buyer(buyer_id)
     return jsonify([review.to_dict() for review in reviews]), 200
 
+@review_bp.route("/list/auction/<int:auction_id>", methods=["GET"])
+def get_review_by_auction(auction_id):
+    """
+    Get auction review.
+    """
+    review = ReviewService.get_review_by_auction(auction_id)
+    return jsonify(review[0].to_dict() if len(review) > 0 else {}), 200
 
 @review_bp.route("/list/seller/<int:seller_id>/rating", methods=["GET"])
 def get_seller_average_rating(seller_id):
