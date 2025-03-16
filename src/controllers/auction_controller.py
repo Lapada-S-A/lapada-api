@@ -43,7 +43,6 @@ def create_auction_endpoint():
         JSON response with the created auction or error message.
     """
     data = request.form.to_dict()
-    print(data)
     
     categories_str = data.get('categories')
     if categories_str:
@@ -105,10 +104,10 @@ def list_auctions():
     try:
         results = auctionService.get_all_auctions(page, per_page, filters)
 
-        # If pagination is used (results is a dictionary with pagination data)
-        if isinstance(results, dict) and "total" in results:
+        # Check if results is a dictionary (pagination results)
+        if isinstance(results, dict) and "pagination" in results:
             auctions_data = []
-            for result in results["items"]:  # 'items' should exist in paginated results
+            for result in results["items"]:  # 'items' is a list in the dictionary
                 auction = result["auction"]
                 document = result["document"]
 
@@ -119,14 +118,16 @@ def list_auctions():
 
             # Return paginated results
             return jsonify({
-                "total": results["total"],
-                "page": results["page"],
-                "per_page": results["per_page"],
+                "pagination": {
+                    "total": results["pagination"]["total"],
+                    "page": results["pagination"]["page"],
+                    "per_page": results["pagination"]["per_page"],
+                },
                 "items": auctions_data
             }), 200
 
-        # If no pagination is used (results is just a list of auctions)
-        else:
+        # If results is a list (non-paginated results)
+        elif isinstance(results, list):
             auctions_data = []
             for result in results:
                 auction = result["auction"]
@@ -138,9 +139,10 @@ def list_auctions():
                 })
 
             # Return only the items without pagination metadata
-            return jsonify(
-                auctions_data
-            ), 200
+            return jsonify(auctions_data), 200
+
+        else:
+            raise ValueError("Formato de resposta inesperado de get_all_auctions.")
 
     except Exception as gen_err:
         return jsonify({'message': str(gen_err)}), 500
@@ -264,7 +266,7 @@ def approve_auction(auction_id):
         JSON response with the updated auction or error message.
     """
     try:
-        auction = auctionService.get_auction_by_id(auction_id)
+        auction = auctionService.get_auction_by_id(auction_id)['auction']
         auction = auctionService.update_auction_status(auction, Status.ACTIVE, Status.PENDING)
         return jsonify(auction.to_dict()), 201
     except ValueError as val_err:
@@ -281,7 +283,7 @@ def reject_auction(auction_id):
         JSON response with the updated auction or error message.
     """
     try:
-        auction = auctionService.get_auction_by_id(auction_id)
+        auction = auctionService.get_auction_by_id(auction_id)['auction']
         auction = auctionService.update_auction_status(auction, Status.REJECTED, Status.PENDING)
         return jsonify(auction.to_dict()), 201
     except ValueError as val_err:
@@ -349,6 +351,14 @@ def update_auction(auction_id):
     """
     data = request.form.to_dict()
 
+    categories_str = data.get('categories')
+    if categories_str:
+        categories = [int(category) for category in categories_str.split(',')]
+    else:
+        categories = []
+    
+    data['categories'] = categories
+
     photos = {f'photo{i}': request.files.get(f'photo{i}') for i in range(1, 5)}
 
     try:
@@ -377,17 +387,19 @@ def get_auctions_by_buyer(buyer_id):
     auctions_data = AuctionService.get_auctions_by_user_bids(buyer_id, page, per_page)
 
     return jsonify({
-        "auctions": [
+        "items": [
             {
                 "auction": auction_data["auction"].to_dict(highest_bid=auctionService.get_highest_bid(auction_id=auction_data["auction"].id)),
                 "document": auction_data["document"].to_dict() if auction_data["document"] else None
             }
             for auction_data in auctions_data["items"]
         ],
-        "total": auctions_data["total"],
-        "page": auctions_data["page"],
-        "per_page": auctions_data["per_page"],
-        "pages": auctions_data["pages"]
+        "pagination": {
+            "total": auctions_data["pagination"]["total"],
+            "page": auctions_data["pagination"]["page"],
+            "per_page": auctions_data["pagination"]["per_page"],
+            "pages": auctions_data["pagination"]["pages"]
+        }
     })
 
 
@@ -419,7 +431,7 @@ def list_auctions_by_categories():
         auctions = auctionService.get_auctions_by_categories_and_status(categories_ids, Status.PENDING, page, per_page)
 
         # If pagination is used (auctions is a dictionary with pagination data)
-        if isinstance(auctions, dict) and 'total' in auctions:
+        if isinstance(auctions, dict) and 'pagination' in auctions:
             auctions_data = []
             for result in auctions['items']:  # 'items' should exist in paginated results
                 auction = result['auction']
@@ -432,9 +444,11 @@ def list_auctions_by_categories():
 
             # Return paginated results
             response = {
-                'total': auctions['total'],
-                'page': auctions['page'],
-                'per_page': auctions['per_page'],
+                'pagination': {
+                    'total': auctions['pagination']['total'],
+                    'page': auctions['pagination']['page'],
+                    'per_page': auctions['pagination']['per_page'],
+                },
                 'items': auctions_data
             }
             return jsonify(response), 200

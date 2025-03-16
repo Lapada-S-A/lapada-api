@@ -146,9 +146,11 @@ class AuctionService:
 
         if page is not None and per_page is not None:
             return {
-                "total": paginated_result.total,
-                "page": paginated_result.page,
-                "per_page": paginated_result.per_page,
+                "pagination": {
+                    "total": paginated_result.total,
+                    "page": paginated_result.page,
+                    "per_page": paginated_result.per_page,
+                },
                 "items": auction_list
             }
 
@@ -242,10 +244,12 @@ class AuctionService:
         ]
 
         return {
-            "total": auctions.total,
-            "page": auctions.page,
-            "per_page": auctions.per_page,
-            "pages": auctions.pages,
+            "pagination": {
+                "total": auctions.total,
+                "page": auctions.page,
+                "per_page": auctions.per_page,
+                "pages": auctions.pages
+            },
             "items": auction_list
         }
 
@@ -277,7 +281,7 @@ class AuctionService:
         """
         Cancela um leilão, definindo o status para CANCELED e os lances como CANCELED.
         """
-        auction = AuctionService.get_auction_by_id(auction_id)
+        auction = AuctionService.get_auction_by_id(auction_id)['auction']
         if not auction:
             raise ValueError("Leilão não encontrado")
         
@@ -305,7 +309,7 @@ class AuctionService:
         """
         Finaliza um leilão, definindo o status para FINISHED e o maior lance como WINNER.
         """
-        auction = AuctionService.get_auction_by_id(auction_id)
+        auction = AuctionService.get_auction_by_id(auction_id)['auction']
         if not auction:
             raise ValueError("Leilão não encontrado")
         
@@ -385,26 +389,25 @@ class AuctionService:
             if "categories" in data:
                 category_ids = data["categories"]
                 auction.categories = Category.query.filter(Category.id.in_(category_ids)).all()
-                    
+
                 if len(auction.categories) != len(category_ids):
                     raise ValueError("Uma ou mais categorias informadas não existem.")
+
+            existing_documents = Document.query.filter_by(auctionId=auction.id, isIdentityDocument=False).all()
+            for doc in existing_documents:
+                db.session.delete(doc)
 
             for i in range(1, 5):
                 photo = photos.get(f'photo{i}')
                 if photo:
-                    existing_document = Document.query.filter_by(auctionId=auction.id, isIdentityDocument=False).offset(i-1).first()
-                    if existing_document:
-                        existing_document.pdfData = photo.read()
-                        existing_document.name = photo.filename
-                    else:
-                        document = Document(
-                            name=photo.filename,
-                            pdfData=photo.read(),
-                            auctionId=auction.id,
-                            isIdentityDocument=False,
-                            clientId=None
-                        )
-                        db.session.add(document)
+                    document = Document(
+                        name=photo.filename,
+                        pdfData=photo.read(),
+                        auctionId=auction.id,
+                        isIdentityDocument=False,
+                        clientId=None
+                    )
+                    db.session.add(document)
 
             db.session.commit()
             return auction
@@ -412,6 +415,7 @@ class AuctionService:
         except (ValueError) as e:
             db.session.rollback()
             raise Exception(f"Erro ao atualizar leilão: {str(e)}")
+
 
 
     @staticmethod
@@ -480,9 +484,11 @@ class AuctionService:
 
         if page is not None and per_page is not None:
             return {
-                "total": paginated_result.total,
-                "page": paginated_result.page,
-                "per_page": paginated_result.per_page,
+                "pagination": {
+                    "total": paginated_result.total,
+                    "page": paginated_result.page,
+                    "per_page": paginated_result.per_page,
+                },
                 "items": auction_list
             }
 
