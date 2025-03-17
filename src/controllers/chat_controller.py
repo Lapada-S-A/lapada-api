@@ -43,10 +43,7 @@ def get_chats_by_user(user_id):
             if user_id in chat_data["users"]:
                 user_chats.append(chat_data)
         except json.JSONDecodeError:
-            continue  
-    
-    if not user_chats:
-        return jsonify({"message": "Nenhum chat encontrado para este usuário"}), 404
+            continue
     
     return jsonify(user_chats), 200
 
